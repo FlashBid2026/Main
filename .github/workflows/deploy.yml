@@ -27,8 +27,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/flashBid-main-server:latest .
-        docker push ${{ secrets.DOCKER_USERNAME }}/flashBid-main-server:latest
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/flashbid-main-server:latest .
+        docker push ${{ secrets.DOCKER_USERNAME }}/flashbid-main-server:latest
 
     - name: Deploy to Server
       uses: appleboy/ssh-action@master
@@ -39,6 +39,6 @@ jobs:
         script: |
           docker stop main-server || true
           docker rm main-server || true
-          docker pull ${{ secrets.DOCKER_USERNAME }}/flashBid-main-server:latest
-          docker run -d --name main-server -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/flashBid-main-server:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/flashbid-main-server:latest
+          docker run -d --name main-server -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/flashbid-main-server:latest
           docker image prune -f
