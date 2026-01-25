@@ -40,6 +40,7 @@ services:
     restart: always
     depends_on:
       - db
+      - redis
     ports:
       - "8080:8080"
     environment:
