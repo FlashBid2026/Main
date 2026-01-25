@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>FlashBid - 경매 등록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#121212] text-white flex items-center justify-center min-h-screen p-6">
+<div class="max-w-xl w-full bg-[#1E1E1E] p-10 rounded-3xl shadow-2xl border border-gray-800">
+    <h1 class="text-3xl font-black mb-8 text-[#007AFF]">새 경매 만들기</h1>
+
+    <form th:action="@{/auctions/new}" method="post" class="space-y-6">
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">상품 이미지 URL</label>
+            <input type="text" name="imageUrl" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]">
+        </div>
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">상품명</label>
+            <input type="text" name="title" placeholder="무엇을 판매하시겠습니까?" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">시작가 (₩)</label>
+                <input type="number" name="startPrice" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">종료 시간</label>
+                <input type="datetime-local" name="endTime" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono text-sm">
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">상세 설명</label>
+            <textarea name="description" rows="4" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3"></textarea>
+        </div>
+
+        <div class="flex space-x-3 pt-4">
+            <button type="button" onclick="history.back()" class="flex-1 bg-gray-700 py-4 rounded-xl font-bold">취소</button>
+            <button type="submit" class="flex-[2] bg-[#007AFF] py-4 rounded-xl font-bold text-lg hover:bg-blue-600 shadow-blue-900/20 shadow-lg">경매 오픈하기</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

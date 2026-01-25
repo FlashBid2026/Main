@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>FlashBid - 실시간 입찰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .leaderboard-item { transition: all 0.5s ease-in-out; }
+        .my-rank { border: 2px solid #FF4D00; box-shadow: 0 0 10px #FF4D00; }
+        .bg-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-[#121212] text-white flex flex-col h-screen">
+<div class="bg-[#1E1E1E] p-4 flex justify-between items-center border-b border-gray-800">
+    <a th:href="@{/}" class="text-gray-400">← 나가기</a>
+    <h2 class="font-bold text-lg" th:text="${auction.title}">한정판 피규어 경매</h2>
+    <div class="bg-red-900 px-4 py-1 rounded-full text-red-400 font-mono font-bold bg-pulse">
+        마감 00:03:45
+    </div>
+</div>
+
+<div class="flex flex-1 overflow-hidden">
+    <div class="flex-1 p-6 flex flex-col space-y-4 overflow-y-auto">
+        <div class="bg-[#1E1E1E] p-2 rounded-2xl">
+            <img th:src="${auction.imageUrl}" class="w-full h-96 object-contain">
+        </div>
+        <div class="bg-[#1E1E1E] p-6 rounded-2xl h-full">
+            <h3 class="text-xl font-bold mb-4">실시간 채팅</h3>
+            <div id="chat-window" class="h-48 overflow-y-auto mb-4 space-y-2 text-sm text-gray-300">
+            </div>
+            <input type="text" placeholder="메시지를 입력하세요..." class="w-full bg-[#2A2A2A] border-none rounded-lg p-3 text-white">
+        </div>
+    </div>
+
+    <div class="w-96 bg-[#181818] p-6 border-l border-gray-800 flex flex-col">
+        <h3 class="text-[#FF4D00] font-black text-xl mb-6 italic italic">REAL-TIME RANKING</h3>
+        <div id="leaderboard" class="space-y-3 flex-1">
+            <div th:each="bidder, iter : ${bidders}"
+                 th:classappend="${bidder.userId == session.userId} ? 'my-rank' : ''"
+                 class="leaderboard-item bg-[#252525] p-4 rounded-xl flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <span class="font-mono italic text-gray-500" th:text="${iter.count}">1</span>
+                    <span class="font-bold" th:text="${bidder.nickname}">사용자닉네임</span>
+                </div>
+                <span class="font-mono font-bold text-[#00FFA3]" th:text="${#numbers.formatInteger(bidder.price, 0, 'COMMA')}">75,000</span>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-gray-800">
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button class="bg-[#2A2A2A] py-2 rounded font-mono hover:bg-gray-700">+1,000</button>
+                <button class="bg-[#2A2A2A] py-2 rounded font-mono hover:bg-gray-700">+5,000</button>
+            </div>
+            <button id="bid-button" class="w-full bg-[#FF4D00] py-4 rounded-xl text-xl font-black shadow-lg shadow-orange-900/20 active:scale-95 transition">
+                BID NOW
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
