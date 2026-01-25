@@ -31,8 +31,6 @@ services:
     hostname: flashbid
     ports:
       - "6379:6379"
-    depends_on:
-      - app
 
   app:
     image: junan01/flashbid-main-server:latest
