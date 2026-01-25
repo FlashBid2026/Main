@@ -25,6 +25,14 @@ services:
       - "3307:3306"
     volumes:
       - ./mysql_data:/var/lib/mysql
+  redis:
+    image: redis:5.0.3
+    container_name: flashbid-redis
+    hostname: flashbid
+    ports:
+      - "6379:6379"
+    depends_on:
+      - app
 
   app:
     image: junan01/flashbid-main-server:latest
