@@ -1,9 +1,9 @@
 package com.FlashBid_Main.FlashBid_Main.Config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 public class ModuleConfig {
