@@ -1,71 +1,126 @@
 package com.FlashBid_Main.FlashBid_Main.Auth.service;
 
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.RefreshToken;
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.TokenType;
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
+import com.FlashBid_Main.FlashBid_Main.Auth.repository.UserRepository;
+import com.FlashBid_Main.FlashBid_Main.Auth.util.LocationExtractor.LocationInfo;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@SpringBootTest
 class JwtTokenProviderTest {
 
-  private JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
-  private final String testSecretKey = "test-secret-key-for-flashbid-project-at-least-32-bytes-long";
-  private final long testValidity = 3600000;
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
-  @BeforeEach
-  void setUp() {
-    jwtTokenProvider = new JwtTokenProvider(testSecretKey);
+    @Autowired
+    private UserRepository userRepository;
 
-    ReflectionTestUtils.setField(jwtTokenProvider, "validity", testValidity);
-  }
+    private User testUser;
+    private LocationInfo testLocation;
 
-  @Test
-  @DisplayName("토큰 생성 및 유효성 검증 성공 테스트")
-  void createAndValidateToken_Success() {
-    String username = "user@example.com";
-    List<String> roles = List.of("ROLE_USER");
+    @BeforeEach
+    void setUp() {
+        testUser = User.builder()
+            .userId("test@example.com")
+            .password("password123")
+            .nickname("testuser")
+            .role(UserRole.USER)
+            .build();
+        testUser = userRepository.save(testUser);
 
-    String token = jwtTokenProvider.createToken(username, roles);
-    boolean isValid = jwtTokenProvider.validToken(token);
+        testLocation = new LocationInfo("127.0.0.1", "South Korea", "Seoul");
+    }
 
-    assertThat(token).isNotNull();
-    assertThat(isValid).isTrue();
-  }
+    @AfterEach
+    void tearDown() {
+        refreshTokenService.deleteByUserId(String.valueOf(testUser.getId()));
+        userRepository.deleteAll();
+    }
 
-  @Test
-  @DisplayName("토큰에서 정확한 Username(Subject)을 추출하는지 테스트")
-  void getUsername_Success() {
-    String expectedUsername = "flashbid_admin";
-    String token = jwtTokenProvider.createToken(expectedUsername, List.of("ROLE_ADMIN"));
+    @Test
+    @DisplayName("AccessToken 생성 및 검증 성공")
+    void createAccessToken_Success() {
+        List<String> roles = List.of("USER");
 
-    String extractedUsername = jwtTokenProvider.getUsername(token);
+        String token = jwtTokenProvider.createAccessToken(testUser.getId(), roles);
 
-    assertThat(extractedUsername).isEqualTo(expectedUsername);
-  }
+        assertThat(token).isNotNull();
+        assertThat(jwtTokenProvider.validAccessToken(token)).isTrue();
+        assertThat(jwtTokenProvider.getUserId(token)).isEqualTo(String.valueOf(testUser.getId()));
+        assertThat(jwtTokenProvider.getRoles(token)).contains("USER");
+        assertThat(jwtTokenProvider.getTokenType(token)).isEqualTo(TokenType.ACCESS);
+    }
 
-  @Test
-  @DisplayName("변조된 토큰으로 검증 시 실패해야 함")
-  void validateToken_InvalidSignature_Fail() {
-    String token = jwtTokenProvider.createToken("user", List.of("USER"));
-    String tamperedToken = token + "modified";
+    @Test
+    @DisplayName("RefreshToken 생성 및 Redis 저장 확인 (위치 정보 포함)")
+    void createRefreshToken_SavedInRedis_WithLocation() {
+        String token = jwtTokenProvider.createRefreshToken(testUser.getId(), testLocation);
 
-    boolean isValid = jwtTokenProvider.validToken(tamperedToken);
+        assertThat(token).isNotNull();
+        assertThat(jwtTokenProvider.validRefreshToken(token)).isTrue();
 
-    assertThat(isValid).isFalse();
-  }
+        Optional<RefreshToken> stored = refreshTokenService.findByUserId(String.valueOf(testUser.getId()));
+        assertThat(stored).isPresent();
+        assertThat(stored.get().getToken()).isEqualTo(token);
+        assertThat(stored.get().getIpAddress()).isEqualTo("127.0.0.1");
+        assertThat(stored.get().getCountry()).isEqualTo("South Korea");
+        assertThat(stored.get().getCity()).isEqualTo("Seoul");
+    }
 
-  @Test
-  @DisplayName("만료된 토큰 검증 시 실패해야 함")
-  void validateToken_Expired_Fail() {
-    ReflectionTestUtils.setField(jwtTokenProvider, "validity", 0L);
-    String token = jwtTokenProvider.createToken("user", List.of("USER"));
+    @Test
+    @DisplayName("RefreshToken으로 AccessToken 갱신 성공 (UserRepository 사용)")
+    void renewAccessToken_Success() {
+        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getId(), testLocation);
 
-    boolean isValid = jwtTokenProvider.validToken(token);
+        String newAccessToken = jwtTokenProvider.renewAccessToken(refreshToken);
 
-    assertThat(isValid).isFalse();
-  }
+        assertThat(newAccessToken).isNotNull();
+        assertThat(jwtTokenProvider.validAccessToken(newAccessToken)).isTrue();
+        assertThat(jwtTokenProvider.getUserId(newAccessToken)).isEqualTo(String.valueOf(testUser.getId()));
+        assertThat(jwtTokenProvider.getRoles(newAccessToken)).contains("USER");
+    }
+
+    @Test
+    @DisplayName("AccessToken을 RefreshToken으로 검증 시 실패")
+    void validateAccessTokenAsRefresh_Fail() {
+        String accessToken = jwtTokenProvider.createAccessToken(testUser.getId(), List.of("USER"));
+
+        assertThat(jwtTokenProvider.validRefreshToken(accessToken)).isFalse();
+    }
+
+    @Test
+    @DisplayName("RefreshToken 무효화 후 재사용 불가")
+    void revokeRefreshToken_CannotReuse() {
+        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getId(), testLocation);
+
+        jwtTokenProvider.revokeRefreshToken(String.valueOf(testUser.getId()));
+
+        assertThat(jwtTokenProvider.validRefreshToken(refreshToken)).isFalse();
+    }
+
+    @Test
+    @DisplayName("만료된 RefreshToken으로 갱신 시도 시 예외 발생")
+    void renewWithExpiredToken_ThrowsException() {
+        String fakeToken = "expired.refresh.token";
+
+        assertThatThrownBy(() -> jwtTokenProvider.renewAccessToken(fakeToken))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Invalid or expired");
+    }
 }

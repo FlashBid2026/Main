@@ -40,3 +40,13 @@ out/
 /mysql_data
 
 nginx/certbot/
+
+
+.claude
+.gemini
+.rules
+*.mmdb
+
+CLAUDE.md
+
+
