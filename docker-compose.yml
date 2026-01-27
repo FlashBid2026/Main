@@ -41,6 +41,8 @@ services:
       - redis
     ports:
       - "8080:8080"
+    volumes:
+      - ./src/main/resources/geoip/GeoLite2-City.mmdb:/app/geoip/database.mmdb
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/flashbid_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
@@ -50,7 +52,7 @@ services:
       JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
 
-      GEOIP_DATABASE_PATH: ${GEOIP_DATABASE_PATH}
+      GEOIP_DATABASE_PATH: file:/app/geoip/database.mmdb
 
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
