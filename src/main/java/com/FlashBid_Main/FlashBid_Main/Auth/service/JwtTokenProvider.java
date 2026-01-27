@@ -55,8 +55,7 @@ public class JwtTokenProvider {
             locationInfo.ipAddress(),
             locationInfo.country(),
             locationInfo.city(),
-            LocalDateTime.now(),
-            LocalDateTime.now().plusSeconds(refreshExpiration / 1000)
+            refreshExpiration
         );
 
         refreshTokenService.save(refreshToken);

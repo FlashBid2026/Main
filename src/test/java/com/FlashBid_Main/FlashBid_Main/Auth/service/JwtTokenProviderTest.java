@@ -12,14 +12,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
+@TestPropertySource(properties = {
+    "jwt.refresh-expiration=2000"
+})
 class JwtTokenProviderTest {
 
     @Autowired
@@ -93,6 +99,7 @@ class JwtTokenProviderTest {
         assertThat(newAccessToken).isNotNull();
         assertThat(jwtTokenProvider.validAccessToken(newAccessToken)).isTrue();
         assertThat(jwtTokenProvider.getUserId(newAccessToken)).isEqualTo(String.valueOf(testUser.getId()));
+
         assertThat(jwtTokenProvider.getRoles(newAccessToken)).contains("USER");
     }
 
@@ -122,5 +129,19 @@ class JwtTokenProviderTest {
         assertThatThrownBy(() -> jwtTokenProvider.renewAccessToken(fakeToken))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Invalid or expired");
+    }
+
+    @Test
+    @DisplayName("RefreshToken Redis TTL 만료 시 검증 실패")
+    void validRefreshToken_ReturnsFalse_WhenRedisTtlExpires() {
+        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getId(), testLocation);
+        assertThat(jwtTokenProvider.validRefreshToken(refreshToken)).isTrue();
+
+        await()
+            .atMost(5, TimeUnit.SECONDS)
+            .pollInterval(500, TimeUnit.MILLISECONDS)
+            .untilAsserted(() -> {
+                assertThat(jwtTokenProvider.validRefreshToken(refreshToken)).isFalse();
+            });
     }
 }
