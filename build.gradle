@@ -45,6 +45,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.awaitility:awaitility:4.2.0'
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf:4.0.0")
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	runtimeOnly 'com.h2database:h2'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
