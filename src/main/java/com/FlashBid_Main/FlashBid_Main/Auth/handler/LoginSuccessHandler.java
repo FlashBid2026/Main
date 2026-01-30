@@ -50,7 +50,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
             .map(GrantedAuthority::getAuthority)
             .toList();
 
-        String accessToken = jwtTokenProvider.createAccessToken(userDetails.getId(), roles);
+        String accessToken = jwtTokenProvider.createAccessToken(userDetails.getId(), userDetails.getNickname(), roles);
 
         LocationInfo locationInfo = locationExtractor.extractFullLocation(request);
         String refreshToken = jwtTokenProvider.createRefreshToken(userDetails.getId(), locationInfo);

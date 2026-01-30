@@ -64,11 +64,12 @@ class JwtTokenProviderTest {
     void createAccessToken_Success() {
         List<String> roles = List.of("USER");
 
-        String token = jwtTokenProvider.createAccessToken(testUser.getId(), roles);
+        String token = jwtTokenProvider.createAccessToken(testUser.getId(), testUser.getNickname(), roles);
 
         assertThat(token).isNotNull();
         assertThat(jwtTokenProvider.validAccessToken(token)).isTrue();
         assertThat(jwtTokenProvider.getUserId(token)).isEqualTo(String.valueOf(testUser.getId()));
+        assertThat(jwtTokenProvider.getNickname(token)).isEqualTo(testUser.getNickname());
         assertThat(jwtTokenProvider.getRoles(token)).contains("USER");
         assertThat(jwtTokenProvider.getTokenType(token)).isEqualTo(TokenType.ACCESS);
     }
@@ -99,14 +100,14 @@ class JwtTokenProviderTest {
         assertThat(newAccessToken).isNotNull();
         assertThat(jwtTokenProvider.validAccessToken(newAccessToken)).isTrue();
         assertThat(jwtTokenProvider.getUserId(newAccessToken)).isEqualTo(String.valueOf(testUser.getId()));
-
+        assertThat(jwtTokenProvider.getNickname(newAccessToken)).isEqualTo(testUser.getNickname());
         assertThat(jwtTokenProvider.getRoles(newAccessToken)).contains("USER");
     }
 
     @Test
     @DisplayName("AccessToken을 RefreshToken으로 검증 시 실패")
     void validateAccessTokenAsRefresh_Fail() {
-        String accessToken = jwtTokenProvider.createAccessToken(testUser.getId(), List.of("USER"));
+        String accessToken = jwtTokenProvider.createAccessToken(testUser.getId(), testUser.getNickname(), List.of("USER"));
 
         assertThat(jwtTokenProvider.validRefreshToken(accessToken)).isFalse();
     }

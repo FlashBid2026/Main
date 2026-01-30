@@ -41,13 +41,13 @@ public class JwtTokenProvider {
         this.userRepository = userRepository;
     }
 
-    public String createAccessToken(Long userId, List<String> roles) {
-        return createToken(String.valueOf(userId), roles, TokenType.ACCESS, accessExpiration);
+    public String createAccessToken(Long userId, String nickname, List<String> roles) {
+        return createToken(String.valueOf(userId), nickname, roles, TokenType.ACCESS, accessExpiration);
     }
 
     public String createRefreshToken(Long userId, LocationInfo locationInfo) {
         String userIdStr = String.valueOf(userId);
-        String token = createToken(userIdStr, null, TokenType.REFRESH, refreshExpiration);
+        String token = createToken(userIdStr, null, null, TokenType.REFRESH, refreshExpiration);
 
         RefreshToken refreshToken = new RefreshToken(
             userIdStr,
@@ -63,7 +63,7 @@ public class JwtTokenProvider {
         return token;
     }
 
-    private String createToken(String userId, List<String> roles, TokenType tokenType, long validity) {
+    private String createToken(String userId, String nickname, List<String> roles, TokenType tokenType, long validity) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + validity);
 
@@ -77,8 +77,13 @@ public class JwtTokenProvider {
             .expiration(expireDate)
             .signWith(secretKey);
 
-        if (tokenType == TokenType.ACCESS && roles != null) {
-            builder.claim("roles", roles);
+        if (tokenType == TokenType.ACCESS) {
+            if (nickname != null) {
+                builder.claim("nickname", nickname);
+            }
+            if (roles != null) {
+                builder.claim("roles", roles);
+            }
         }
 
         return builder.compact();
@@ -152,7 +157,7 @@ public class JwtTokenProvider {
 
         List<String> roles = List.of(user.getRole().name());
 
-        return createAccessToken(Long.parseLong(userId), roles);
+        return createAccessToken(Long.parseLong(userId), user.getNickname(), roles);
     }
 
     public void revokeRefreshToken(String userId) {
@@ -175,6 +180,15 @@ public class JwtTokenProvider {
             .parseSignedClaims(token)
             .getPayload()
             .get("roles", List.class);
+    }
+
+    public String getNickname(String token) {
+        return Jwts.parser()
+            .verifyWith(secretKey)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .get("nickname", String.class);
     }
 
     public TokenType getTokenType(String token) {

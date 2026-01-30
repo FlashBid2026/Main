@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -75,7 +76,7 @@ class LoginSuccessHandlerTest {
     void onAuthenticationSuccess_CreatesAccessTokenCookie() throws Exception {
         LocationInfo locationInfo = new LocationInfo("127.0.0.1", "Local", "Local");
         given(locationExtractor.extractFullLocation(any())).willReturn(locationInfo);
-        given(jwtTokenProvider.createAccessToken(any(), anyList())).willReturn("test-access-token");
+        given(jwtTokenProvider.createAccessToken(any(), anyString(), anyList())).willReturn("test-access-token");
         given(jwtTokenProvider.createRefreshToken(any(), any(LocationInfo.class))).willReturn("test-refresh-token");
 
         loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
@@ -90,7 +91,7 @@ class LoginSuccessHandlerTest {
     void onAuthenticationSuccess_CreatesRefreshTokenCookie() throws Exception {
         LocationInfo locationInfo = new LocationInfo("127.0.0.1", "Local", "Local");
         given(locationExtractor.extractFullLocation(any())).willReturn(locationInfo);
-        given(jwtTokenProvider.createAccessToken(any(), anyList())).willReturn("test-access-token");
+        given(jwtTokenProvider.createAccessToken(any(), anyString(), anyList())).willReturn("test-access-token");
         given(jwtTokenProvider.createRefreshToken(any(), any(LocationInfo.class))).willReturn("test-refresh-token");
 
         loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
@@ -105,7 +106,7 @@ class LoginSuccessHandlerTest {
     void onAuthenticationSuccess_AccessTokenCookie_HasCorrectSettings() throws Exception {
         LocationInfo locationInfo = new LocationInfo("127.0.0.1", "Local", "Local");
         given(locationExtractor.extractFullLocation(any())).willReturn(locationInfo);
-        given(jwtTokenProvider.createAccessToken(any(), anyList())).willReturn("test-access-token");
+        given(jwtTokenProvider.createAccessToken(any(), anyString(), anyList())).willReturn("test-access-token");
         given(jwtTokenProvider.createRefreshToken(any(), any(LocationInfo.class))).willReturn("test-refresh-token");
 
         loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
@@ -121,7 +122,7 @@ class LoginSuccessHandlerTest {
     void onAuthenticationSuccess_RefreshTokenCookie_HasCorrectSettings() throws Exception {
         LocationInfo locationInfo = new LocationInfo("127.0.0.1", "Local", "Local");
         given(locationExtractor.extractFullLocation(any())).willReturn(locationInfo);
-        given(jwtTokenProvider.createAccessToken(any(), anyList())).willReturn("test-access-token");
+        given(jwtTokenProvider.createAccessToken(any(), anyString(), anyList())).willReturn("test-access-token");
         given(jwtTokenProvider.createRefreshToken(any(), any(LocationInfo.class))).willReturn("test-refresh-token");
 
         loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
@@ -137,7 +138,7 @@ class LoginSuccessHandlerTest {
     void onAuthenticationSuccess_RedirectsToHome() throws Exception {
         LocationInfo locationInfo = new LocationInfo("127.0.0.1", "Local", "Local");
         given(locationExtractor.extractFullLocation(any())).willReturn(locationInfo);
-        given(jwtTokenProvider.createAccessToken(any(), anyList())).willReturn("test-access-token");
+        given(jwtTokenProvider.createAccessToken(any(), anyString(), anyList())).willReturn("test-access-token");
         given(jwtTokenProvider.createRefreshToken(any(), any(LocationInfo.class))).willReturn("test-refresh-token");
 
         loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
@@ -150,12 +151,12 @@ class LoginSuccessHandlerTest {
     void onAuthenticationSuccess_CallsJwtTokenProviderWithCorrectParameters() throws Exception {
         LocationInfo locationInfo = new LocationInfo("127.0.0.1", "Local", "Local");
         given(locationExtractor.extractFullLocation(any())).willReturn(locationInfo);
-        given(jwtTokenProvider.createAccessToken(any(), anyList())).willReturn("test-access-token");
+        given(jwtTokenProvider.createAccessToken(any(), anyString(), anyList())).willReturn("test-access-token");
         given(jwtTokenProvider.createRefreshToken(any(), any(LocationInfo.class))).willReturn("test-refresh-token");
 
         loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
 
-        verify(jwtTokenProvider).createAccessToken(any(), anyList());
+        verify(jwtTokenProvider).createAccessToken(any(), anyString(), anyList());
         verify(jwtTokenProvider).createRefreshToken(any(), any(LocationInfo.class));
     }
 
@@ -164,7 +165,7 @@ class LoginSuccessHandlerTest {
     void onAuthenticationSuccess_ExtractsLocationFromRequest() throws Exception {
         LocationInfo locationInfo = new LocationInfo("127.0.0.1", "Local", "Local");
         given(locationExtractor.extractFullLocation(request)).willReturn(locationInfo);
-        given(jwtTokenProvider.createAccessToken(any(), anyList())).willReturn("test-access-token");
+        given(jwtTokenProvider.createAccessToken(any(), anyString(), anyList())).willReturn("test-access-token");
         given(jwtTokenProvider.createRefreshToken(any(), any(LocationInfo.class))).willReturn("test-refresh-token");
 
         loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
