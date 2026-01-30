@@ -1,5 +1,6 @@
 package com.FlashBid_Main.FlashBid_Main.Config;
 
+import com.FlashBid_Main.FlashBid_Main.Auth.filter.JwtFilter;
 import com.FlashBid_Main.FlashBid_Main.Auth.handler.LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @EnableWebSecurity
@@ -19,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
   private final LoginSuccessHandler loginSuccessHandler;
+  private final JwtFilter jwtFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -37,6 +40,8 @@ public class SecurityConfig {
               response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             })
         )
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
         .formLogin(form -> form
             .loginPage("/login")
             .usernameParameter("userId")
