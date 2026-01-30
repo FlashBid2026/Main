@@ -1,5 +1,7 @@
 package com.FlashBid_Main.FlashBid_Main.Auth.filter;
 
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
 import com.FlashBid_Main.FlashBid_Main.Auth.service.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,6 +39,12 @@ public class JwtFilter extends OncePerRequestFilter {
             List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .toList();
+
+//            User user = User.builder()
+//                .userId(userId)
+//                .nickname(nickname)
+//                .role(UserRole.valueOf(roles.get(0).replace("ROLE_", "")))
+//                .build();
 
             UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(userId, null, authorities);

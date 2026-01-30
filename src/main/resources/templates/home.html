@@ -31,7 +31,7 @@
             <div class="flex items-center space-x-4 border-l border-gray-700 pl-6">
                 <div class="text-right">
                     <p class="text-[10px] text-gray-500 uppercase tracking-widest">Active Bidder</p>
-                    <p class="font-bold text-white" sec:authentication="principal.nickname">닉네임</p>
+                    <p class="font-bold text-white" sec:authentication="principal.user.nickname">닉네임</p>
                 </div>
                 <form th:action="@{/logout}" method="post" class="m-0">
                     <button type="submit" class="bg-gray-800 text-gray-400 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-900 hover:text-white transition">
