@@ -43,6 +43,7 @@ services:
       - "8080:8080"
     volumes:
       - ./src/main/resources/geoip/GeoLite2-City.mmdb:/app/geoip/database.mmdb
+      - ./google_bucket_key.json:/app/google_bucket_key.json
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/flashbid_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
