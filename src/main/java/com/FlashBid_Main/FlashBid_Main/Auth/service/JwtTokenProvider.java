@@ -41,12 +41,12 @@ public class JwtTokenProvider {
         this.userRepository = userRepository;
     }
 
-    public String createAccessToken(Long userId, String nickname, List<String> roles) {
-        return createToken(String.valueOf(userId), nickname, roles, TokenType.ACCESS, accessExpiration);
+    public String createAccessToken(String userId, String nickname, List<String> roles) {
+        return createToken(userId, nickname, roles, TokenType.ACCESS, accessExpiration);
     }
 
-    public String createRefreshToken(Long userId, LocationInfo locationInfo) {
-        String userIdStr = String.valueOf(userId);
+    public String createRefreshToken(String userId, LocationInfo locationInfo) {
+        String userIdStr = userId;
         String token = createToken(userIdStr, null, null, TokenType.REFRESH, refreshExpiration);
 
         RefreshToken refreshToken = new RefreshToken(
@@ -152,12 +152,12 @@ public class JwtTokenProvider {
             throw new IllegalArgumentException("Token user mismatch");
         }
 
-        User user = userRepository.findById(Long.parseLong(userId))
+        User user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         List<String> roles = List.of(user.getRole().name());
 
-        return createAccessToken(Long.parseLong(userId), user.getNickname(), roles);
+        return createAccessToken(userId, user.getNickname(), roles);
     }
 
     public void revokeRefreshToken(String userId) {

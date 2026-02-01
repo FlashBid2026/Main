@@ -55,7 +55,7 @@ class JwtTokenProviderTest {
 
     @AfterEach
     void tearDown() {
-        refreshTokenService.deleteByUserId(String.valueOf(testUser.getId()));
+        refreshTokenService.deleteByUserId(testUser.getUserId());
         userRepository.deleteAll();
     }
 
@@ -64,11 +64,11 @@ class JwtTokenProviderTest {
     void createAccessToken_Success() {
         List<String> roles = List.of("USER");
 
-        String token = jwtTokenProvider.createAccessToken(testUser.getId(), testUser.getNickname(), roles);
+        String token = jwtTokenProvider.createAccessToken(testUser.getUserId(), testUser.getNickname(), roles);
 
         assertThat(token).isNotNull();
         assertThat(jwtTokenProvider.validAccessToken(token)).isTrue();
-        assertThat(jwtTokenProvider.getUserId(token)).isEqualTo(String.valueOf(testUser.getId()));
+        assertThat(jwtTokenProvider.getUserId(token)).isEqualTo(testUser.getUserId());
         assertThat(jwtTokenProvider.getNickname(token)).isEqualTo(testUser.getNickname());
         assertThat(jwtTokenProvider.getRoles(token)).contains("USER");
         assertThat(jwtTokenProvider.getTokenType(token)).isEqualTo(TokenType.ACCESS);
@@ -77,12 +77,12 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("RefreshToken 생성 및 Redis 저장 확인 (위치 정보 포함)")
     void createRefreshToken_SavedInRedis_WithLocation() {
-        String token = jwtTokenProvider.createRefreshToken(testUser.getId(), testLocation);
+        String token = jwtTokenProvider.createRefreshToken(testUser.getUserId(), testLocation);
 
         assertThat(token).isNotNull();
         assertThat(jwtTokenProvider.validRefreshToken(token)).isTrue();
 
-        Optional<RefreshToken> stored = refreshTokenService.findByUserId(String.valueOf(testUser.getId()));
+        Optional<RefreshToken> stored = refreshTokenService.findByUserId(testUser.getUserId());
         assertThat(stored).isPresent();
         assertThat(stored.get().getToken()).isEqualTo(token);
         assertThat(stored.get().getIpAddress()).isEqualTo("127.0.0.1");
@@ -93,13 +93,13 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("RefreshToken으로 AccessToken 갱신 성공 (UserRepository 사용)")
     void renewAccessToken_Success() {
-        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getId(), testLocation);
+        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getUserId(), testLocation);
 
         String newAccessToken = jwtTokenProvider.renewAccessToken(refreshToken);
 
         assertThat(newAccessToken).isNotNull();
         assertThat(jwtTokenProvider.validAccessToken(newAccessToken)).isTrue();
-        assertThat(jwtTokenProvider.getUserId(newAccessToken)).isEqualTo(String.valueOf(testUser.getId()));
+        assertThat(jwtTokenProvider.getUserId(newAccessToken)).isEqualTo(testUser.getUserId());
         assertThat(jwtTokenProvider.getNickname(newAccessToken)).isEqualTo(testUser.getNickname());
         assertThat(jwtTokenProvider.getRoles(newAccessToken)).contains("USER");
     }
@@ -107,7 +107,7 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("AccessToken을 RefreshToken으로 검증 시 실패")
     void validateAccessTokenAsRefresh_Fail() {
-        String accessToken = jwtTokenProvider.createAccessToken(testUser.getId(), testUser.getNickname(), List.of("USER"));
+        String accessToken = jwtTokenProvider.createAccessToken(testUser.getUserId(), testUser.getNickname(), List.of("USER"));
 
         assertThat(jwtTokenProvider.validRefreshToken(accessToken)).isFalse();
     }
@@ -115,9 +115,9 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("RefreshToken 무효화 후 재사용 불가")
     void revokeRefreshToken_CannotReuse() {
-        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getId(), testLocation);
+        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getUserId(), testLocation);
 
-        jwtTokenProvider.revokeRefreshToken(String.valueOf(testUser.getId()));
+        jwtTokenProvider.revokeRefreshToken(testUser.getUserId());
 
         assertThat(jwtTokenProvider.validRefreshToken(refreshToken)).isFalse();
     }
@@ -135,7 +135,7 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("RefreshToken Redis TTL 만료 시 검증 실패")
     void validRefreshToken_ReturnsFalse_WhenRedisTtlExpires() {
-        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getId(), testLocation);
+        String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getUserId(), testLocation);
         assertThat(jwtTokenProvider.validRefreshToken(refreshToken)).isTrue();
 
         await()

@@ -50,10 +50,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
             .map(GrantedAuthority::getAuthority)
             .toList();
 
-        String accessToken = jwtTokenProvider.createAccessToken(userDetails.getId(), userDetails.getNickname(), roles);
+        String accessToken = jwtTokenProvider.createAccessToken(userDetails.getUserId(), userDetails.getNickname(), roles);
 
         LocationInfo locationInfo = locationExtractor.extractFullLocation(request);
-        String refreshToken = jwtTokenProvider.createRefreshToken(userDetails.getId(), locationInfo);
+        String refreshToken = jwtTokenProvider.createRefreshToken(userDetails.getUserId(), locationInfo);
 
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setHttpOnly(true);

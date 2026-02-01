@@ -1,5 +1,6 @@
 package com.FlashBid_Main.FlashBid_Main.Auth.filter;
 
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.CustomUserDetails;
 import com.FlashBid_Main.FlashBid_Main.Auth.service.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
@@ -60,8 +61,9 @@ class JwtFilterTest {
         jwtFilter.doFilterInternal(request, response, filterChain);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         assertThat(authentication).isNotNull();
-        assertThat(authentication.getPrincipal()).isEqualTo(userId);
+        assertThat(userDetails.getUserId()).isEqualTo(userId);
         assertThat(authentication.getCredentials()).isNull();
         assertThat(authentication.getAuthorities())
             .extracting(GrantedAuthority::getAuthority)

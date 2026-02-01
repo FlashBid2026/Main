@@ -1,5 +1,6 @@
 package com.FlashBid_Main.FlashBid_Main.Auth.filter;
 
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.CustomUserDetails;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
 import com.FlashBid_Main.FlashBid_Main.Auth.service.JwtTokenProvider;
@@ -34,20 +35,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (token != null && jwtTokenProvider.validAccessToken(token)) {
             String userId = jwtTokenProvider.getUserId(token);
+            String nickname = jwtTokenProvider.getNickname(token);
             List<String> roles = jwtTokenProvider.getRoles(token);
 
             List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .toList();
 
-//            User user = User.builder()
-//                .userId(userId)
-//                .nickname(nickname)
-//                .role(UserRole.valueOf(roles.get(0).replace("ROLE_", "")))
-//                .build();
+            CustomUserDetails userDetails = new CustomUserDetails(userId, null, nickname, authorities);
 
             UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
