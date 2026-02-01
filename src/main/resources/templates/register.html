@@ -9,35 +9,172 @@
 <div class="max-w-xl w-full bg-[#1E1E1E] p-10 rounded-3xl shadow-2xl border border-gray-800">
     <h1 class="text-3xl font-black mb-8 text-[#007AFF]">새 경매 만들기</h1>
 
-    <form th:action="@{/auctions/new}" method="post" class="space-y-6">
+    <form id="auction-form" th:action="@{/auctions/new}" method="post" enctype="multipart/form-data" class="space-y-6">
+
         <div>
-            <label class="block text-sm text-gray-400 mb-2">상품 이미지 URL</label>
-            <input type="text" name="imageUrl" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]">
+            <label class="block text-sm text-gray-400 mb-2">상품 이미지 등록 (누적 추가 가능)</label>
+            <div id="drop-zone" class="w-full bg-[#2A2A2A] border-2 border-dashed border-gray-700 rounded-xl p-6 transition-all cursor-pointer hover:border-[#007AFF] text-center">
+                <input type="file" id="file-input" class="hidden" accept="image/*" multiple>
+
+                <div id="upload-placeholder">
+                    <svg class="mx-auto h-10 w-10 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <p class="text-sm text-gray-400">클릭하거나 이미지를 드래그하여 추가하세요</p>
+                </div>
+
+                <ul id="file-list" class="mt-4 text-left space-y-2 hidden">
+                </ul>
+            </div>
         </div>
+
         <div>
             <label class="block text-sm text-gray-400 mb-2">상품명</label>
-            <input type="text" name="title" placeholder="무엇을 판매하시겠습니까?" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]">
+            <input type="text" name="title" required placeholder="무엇을 판매하시겠습니까?" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]">
         </div>
+
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm text-gray-400 mb-2">시작가 (₩)</label>
-                <input type="number" name="startPrice" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono">
+                <input type="number" name="startPrice" required class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono focus:outline-none focus:border-[#007AFF]">
             </div>
             <div>
-                <label class="block text-sm text-gray-400 mb-2">종료 시간</label>
-                <input type="datetime-local" name="endTime" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono text-sm">
+                <label class="block text-sm text-gray-400 mb-2">경매 기간 (시간)</label>
+                <div class="relative">
+                    <select name="duration" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono text-sm focus:outline-none focus:border-[#007AFF] appearance-none cursor-pointer">
+                        <script>
+                            for(let i=1; i<=48; i++) {
+                                document.write(`<option value="${i}">${i}시간 후 종료</option>`);
+                            }
+                        </script>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
             </div>
         </div>
+
         <div>
             <label class="block text-sm text-gray-400 mb-2">상세 설명</label>
-            <textarea name="description" rows="4" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3"></textarea>
+            <textarea name="description" rows="4" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]"></textarea>
         </div>
 
         <div class="flex space-x-3 pt-4">
-            <button type="button" onclick="history.back()" class="flex-1 bg-gray-700 py-4 rounded-xl font-bold">취소</button>
-            <button type="submit" class="flex-[2] bg-[#007AFF] py-4 rounded-xl font-bold text-lg hover:bg-blue-600 shadow-blue-900/20 shadow-lg">경매 오픈하기</button>
+            <button type="button" onclick="history.back()" class="flex-1 bg-gray-700 py-4 rounded-xl font-bold hover:bg-gray-600 transition-colors">취소</button>
+            <button type="submit" class="flex-[2] bg-[#007AFF] py-4 rounded-xl font-bold text-lg hover:bg-blue-600 shadow-blue-900/20 shadow-lg transition-all">경매 오픈하기</button>
         </div>
     </form>
 </div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+    const placeholder = document.getElementById('upload-placeholder');
+    const form = document.getElementById('auction-form');
+
+    // 파일 누적 관리를 위한 전역 DataTransfer 객체
+    let allFiles = new DataTransfer();
+
+    // 1. 드래그 앤 드롭 및 클릭 이벤트 설정
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-[#007AFF]', 'bg-[#2d2d2d]');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-[#007AFF]', 'bg-[#2d2d2d]');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-[#007AFF]', 'bg-[#2d2d2d]');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    // 2. 파일 처리 (누적) 로직
+    function handleFiles(newFiles) {
+        if (newFiles.length > 0) {
+            placeholder.classList.add('hidden');
+            fileList.classList.remove('hidden');
+
+            Array.from(newFiles).forEach(file => {
+                // 중복 체크 (이름과 크기 기준)
+                const isDuplicate = Array.from(allFiles.files).some(f => f.name === file.name && f.size === file.size);
+
+                if (!isDuplicate && file.type.startsWith('image/')) {
+                    allFiles.items.add(file);
+                    renderFileRow(file);
+                }
+            });
+
+            // 입력 필드에 현재까지 누적된 파일 목록 동기화
+            fileInput.files = allFiles.files;
+        }
+    }
+
+    // 3. 파일 리스트 UI 렌더링
+    function renderFileRow(file) {
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between bg-[#1A1A1A] p-3 rounded-xl border border-gray-800 group hover:border-gray-600 transition-all';
+
+        li.innerHTML = `
+            <div class="flex items-center overflow-hidden">
+                <div class="w-8 h-8 bg-[#007AFF]/10 rounded flex items-center justify-center mr-3 flex-shrink-0">
+                    <svg class="h-4 w-4 text-[#007AFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <span class="truncate text-sm text-gray-300 font-medium">${file.name}</span>
+            </div>
+            <button type="button" class="text-gray-500 hover:text-red-500 transition-colors ml-2 px-2"
+                    onclick="removeFile('${file.name}', ${file.size}, this, event)">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        `;
+        fileList.appendChild(li);
+    }
+
+    // 4. 파일 삭제 기능 (버블링 방지 포함)
+    window.removeFile = function(name, size, btn, event) {
+        // 이벤트 전파 방지: 부모인 drop-zone의 클릭 이벤트(파일 탐색기 열기)가 실행되지 않게 함
+        if (event) event.stopPropagation();
+
+        const newTransfer = new DataTransfer();
+        Array.from(allFiles.files).forEach(file => {
+            if (file.name !== name || file.size !== size) {
+                newTransfer.items.add(file);
+            }
+        });
+
+        allFiles = newTransfer;
+        fileInput.files = allFiles.files;
+
+        // 해당 UI 요소 삭제
+        btn.closest('li').remove();
+
+        // 목록이 비었으면 플레이스홀더 다시 표시
+        if (allFiles.files.length === 0) {
+            placeholder.classList.remove('hidden');
+            fileList.classList.add('hidden');
+        }
+    };
+
+    // 5. 폼 제출 시 최종 설정
+    form.onsubmit = () => {
+        // 백엔드 컨트롤러의 MultipartFile[] 매개변수 이름과 일치하도록 설정
+        fileInput.name = "imageFiles";
+        return true;
+    };
+</script>
 </body>
 </html>
