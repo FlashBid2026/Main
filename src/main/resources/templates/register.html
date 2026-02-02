@@ -29,6 +29,33 @@
         </div>
 
         <div>
+            <label class="block text-sm text-gray-400 mb-2">카테고리</label>
+            <div class="relative">
+                <select name="category" required
+                        class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 text-sm focus:outline-none focus:border-[#007AFF] appearance-none cursor-pointer">
+                    <option value="" disabled selected>카테고리를 선택하세요</option>
+                    <option value="ELECTRONICS">가전</option>
+                    <option value="FASHION">의류</option>
+                    <option value="SHOES">신발</option>
+                    <option value="BAGS">가방</option>
+                    <option value="ACCESSORIES">악세사리</option>
+                    <option value="BEAUTY">뷰티</option>
+                    <option value="SPORTS">스포츠</option>
+                    <option value="BOOKS_MUSIC">도서/음반</option>
+                    <option value="FURNITURE">가구/인테리어</option>
+                    <option value="DIGITAL">디지털</option>
+                    <option value="HOBBY">게임/취미</option>
+                    <option value="OTHERS">기타</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div>
             <label class="block text-sm text-gray-400 mb-2">상품명</label>
             <input type="text" name="title" required placeholder="무엇을 판매하시겠습니까?" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]">
         </div>
@@ -211,6 +238,13 @@
 
     // 5. 폼 제출 시 최종 설정
     form.onsubmit = () => {
+        // 카테고리 검증
+        const categorySelect = document.querySelector('select[name="category"]');
+        if (!categorySelect.value) {
+            alert('카테고리를 선택해주세요.');
+            return false;
+        }
+
         // 시작가 검증
         if (currentPrice < 1000) {
             alert('시작가는 최소 1,000원 이상이어야 합니다.');

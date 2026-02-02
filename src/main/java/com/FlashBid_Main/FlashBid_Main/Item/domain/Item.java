@@ -26,6 +26,10 @@ public class Item {
   @Column(nullable = false)
   private String description;
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Category category;
+
   @Column(nullable = false)
   private Long startPrice;
 
@@ -45,9 +49,10 @@ public class Item {
   private LocalDateTime createdAt;
 
   @Builder
-  public Item(String itemName, String description, Long startPrice, LocalDateTime endTime, User seller) {
+  public Item(String itemName, String description, Category category, Long startPrice, LocalDateTime endTime, User seller) {
     this.itemName = itemName;
     this.description = description;
+    this.category = category;
     this.startPrice = startPrice;
     this.currentPrice = startPrice;
     this.endTime = endTime;

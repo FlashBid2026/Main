@@ -30,6 +30,7 @@ public class ItemService {
     Item item = Item.builder()
         .itemName(dto.getItemName())
         .description(dto.getDescription())
+        .category(dto.getCategory())
         .startPrice(dto.getStartPrice())
         .endTime(calculatedEndTime)
         .seller(seller)
