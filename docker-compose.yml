@@ -54,7 +54,9 @@ services:
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
 
       GEOIP_DATABASE_PATH: file:/app/geoip/database.mmdb
-      GCP_STORAGE_CREDENTALS_LOCATION: file:/app/google_bucket_key.json
+
+      SPRING_CLOUD_GCP_STORAGE_CREDENTIALS_LOCATION: file:/app/google_bucket_key.json
+      GOOGLE_APPLICATION_CREDENTIALS: /app/google_bucket_key.json
 
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
