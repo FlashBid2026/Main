@@ -4,15 +4,18 @@ import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import com.FlashBid_Main.FlashBid_Main.Gcs.service.GcsService;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.Item;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.ItemImage;
+import com.FlashBid_Main.FlashBid_Main.Item.dto.ItemListResponse;
 import com.FlashBid_Main.FlashBid_Main.Item.dto.ItemRegistrationDto;
 import com.FlashBid_Main.FlashBid_Main.Item.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,5 +49,14 @@ public class ItemService {
     }
 
     return itemRepository.save(item).getId();
+  }
+
+  public List<ItemListResponse> getActiveItemsForHome() {
+    return itemRepository.findByEndTimeAfterOrderByEndTimeAsc(
+            LocalDateTime.now(),
+            PageRequest.of(0, 12)
+        )
+        .map(ItemListResponse::from)
+        .getContent();
   }
 }

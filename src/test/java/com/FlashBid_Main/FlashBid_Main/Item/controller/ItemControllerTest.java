@@ -57,6 +57,7 @@ class ItemControllerTest {
                     .param("description", "테스트 상품 설명")
                     .param("startPrice", "10000")
                     .param("durationHour", "24")
+                    .param("category", "ELECTRONICS")
                     .with(user("test@example.com").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(content().string("물품 등록 성공! ID: 1"));
@@ -73,6 +74,7 @@ class ItemControllerTest {
                     .param("description", "이미지 없는 상품 설명")
                     .param("startPrice", "5000")
                     .param("durationHour", "12")
+                    .param("category", "ELECTRONICS")
                     .with(user("test@example.com").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(content().string("물품 등록 성공! ID: 2"));
@@ -94,6 +96,7 @@ class ItemControllerTest {
                     .param("description", "테스트 상품 설명")
                     .param("startPrice", "10000")
                     .param("durationHour", "24")
+                    .param("category", "ELECTRONICS")
                     .with(user("test@example.com").roles("USER")))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("등록 실패: 이미지 업로드 실패"));
@@ -123,6 +126,7 @@ class ItemControllerTest {
                     .param("description", "여러 이미지가 있는 상품")
                     .param("startPrice", "30000")
                     .param("durationHour", "48")
+                    .param("category", "ELECTRONICS")
                     .with(user("test@example.com").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(content().string("물품 등록 성공! ID: 3"));
@@ -139,6 +143,7 @@ class ItemControllerTest {
                     .param("description", "1시간 경매")
                     .param("startPrice", "1000")
                     .param("durationHour", "1")
+                    .param("category", "ELECTRONICS")
                     .with(user("test@example.com").roles("USER")))
                 .andExpect(status().isOk());
 
@@ -147,6 +152,7 @@ class ItemControllerTest {
                     .param("description", "168시간(1주일) 경매")
                     .param("startPrice", "100000")
                     .param("durationHour", "168")
+                    .param("category", "ELECTRONICS")
                     .with(user("test@example.com").roles("USER")))
                 .andExpect(status().isOk());
         }
@@ -168,7 +174,8 @@ class ItemControllerTest {
                     .param("itemName", "테스트 상품")
                     .param("description", "테스트 상품 설명")
                     .param("startPrice", "10000")
-                    .param("durationHour", "24"))
+                    .param("durationHour", "24")
+                    .param("category", "ELECTRONICS"))
                 .andExpect(status().is4xxClientError());
         }
     }

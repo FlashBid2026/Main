@@ -2,6 +2,7 @@ package com.FlashBid_Main.FlashBid_Main.Item.domain;
 
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
+import com.FlashBid_Main.FlashBid_Main.Item.domain.Category;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ class ItemTest {
                 .startPrice(10000L)
                 .endTime(endTime)
                 .seller(seller)
+                .category(Category.ELECTRONICS)
                 .build();
 
             assertThat(item.getItemName()).isEqualTo("테스트 상품");
@@ -54,6 +56,7 @@ class ItemTest {
                 .startPrice(50000L)
                 .endTime(endTime)
                 .seller(null)
+                .category(Category.ELECTRONICS)
                 .build();
 
             assertThat(item.getCurrentPrice()).isEqualTo(50000L);
@@ -71,6 +74,7 @@ class ItemTest {
                 .startPrice(10000L)
                 .endTime(endTime)
                 .seller(null)
+                .category(Category.ELECTRONICS)
                 .build();
 
             assertThat(item.getImages()).isNotNull();
@@ -93,6 +97,7 @@ class ItemTest {
                 .startPrice(10000L)
                 .endTime(endTime)
                 .seller(null)
+                .category(Category.ELECTRONICS)
                 .build();
 
             ItemImage image = new ItemImage("test-image.jpg");
@@ -115,6 +120,7 @@ class ItemTest {
                 .startPrice(10000L)
                 .endTime(endTime)
                 .seller(null)
+                .category(Category.ELECTRONICS)
                 .build();
 
             ItemImage image1 = new ItemImage("image1.jpg");

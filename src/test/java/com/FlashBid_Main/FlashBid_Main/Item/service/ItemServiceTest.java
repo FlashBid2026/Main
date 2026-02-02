@@ -3,6 +3,7 @@ package com.FlashBid_Main.FlashBid_Main.Item.service;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
 import com.FlashBid_Main.FlashBid_Main.Gcs.service.GcsService;
+import com.FlashBid_Main.FlashBid_Main.Item.domain.Category;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.Item;
 import com.FlashBid_Main.FlashBid_Main.Item.dto.ItemRegistrationDto;
 import com.FlashBid_Main.FlashBid_Main.Item.repository.ItemRepository;
@@ -57,6 +58,7 @@ class ItemServiceTest {
         dto.setDescription("테스트 상품 설명입니다.");
         dto.setStartPrice(10000L);
         dto.setDurationHour(24);
+        dto.setCategory(Category.ELECTRONICS);
     }
 
     @Nested

@@ -3,6 +3,7 @@ package com.FlashBid_Main.FlashBid_Main.Item.repository;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
 import com.FlashBid_Main.FlashBid_Main.Auth.repository.UserRepository;
+import com.FlashBid_Main.FlashBid_Main.Item.domain.Category;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.Item;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -76,6 +77,7 @@ class ItemRepositoryTest {
                 .startPrice(10000L)
                 .endTime(now.plusHours(1))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             Item activeItem2 = Item.builder()
@@ -84,6 +86,7 @@ class ItemRepositoryTest {
                 .startPrice(20000L)
                 .endTime(now.plusHours(2))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             Item expiredItem = Item.builder()
@@ -92,6 +95,7 @@ class ItemRepositoryTest {
                 .startPrice(30000L)
                 .endTime(now.minusHours(1))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             itemRepository.saveAll(List.of(activeItem1, activeItem2, expiredItem));
@@ -116,6 +120,7 @@ class ItemRepositoryTest {
                 .startPrice(10000L)
                 .endTime(now.plusHours(1))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             Item item2 = Item.builder()
@@ -124,6 +129,7 @@ class ItemRepositoryTest {
                 .startPrice(20000L)
                 .endTime(now.plusHours(5))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             Item item3 = Item.builder()
@@ -132,6 +138,7 @@ class ItemRepositoryTest {
                 .startPrice(15000L)
                 .endTime(now.plusHours(3))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             itemRepository.saveAll(List.of(item1, item2, item3));
@@ -157,6 +164,7 @@ class ItemRepositoryTest {
                     .startPrice(10000L * i)
                     .endTime(now.plusHours(i))
                     .seller(seller1)
+                    .category(Category.ELECTRONICS)
                     .build();
                 itemRepository.save(item);
             }
@@ -183,6 +191,7 @@ class ItemRepositoryTest {
                 .startPrice(10000L)
                 .endTime(now.minusHours(1))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             Item expiredItem2 = Item.builder()
@@ -191,6 +200,7 @@ class ItemRepositoryTest {
                 .startPrice(20000L)
                 .endTime(now.minusDays(1))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             itemRepository.saveAll(List.of(expiredItem1, expiredItem2));
@@ -217,6 +227,7 @@ class ItemRepositoryTest {
                 .startPrice(10000L)
                 .endTime(now.plusHours(1))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             Item seller1Item2 = Item.builder()
@@ -225,6 +236,7 @@ class ItemRepositoryTest {
                 .startPrice(20000L)
                 .endTime(now.plusHours(2))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
 
             Item seller2Item = Item.builder()
@@ -233,6 +245,7 @@ class ItemRepositoryTest {
                 .startPrice(30000L)
                 .endTime(now.plusHours(3))
                 .seller(seller2)
+                .category(Category.ELECTRONICS)
                 .build();
 
             itemRepository.saveAll(List.of(seller1Item1, seller1Item2, seller2Item));
@@ -257,6 +270,7 @@ class ItemRepositoryTest {
                 .startPrice(10000L)
                 .endTime(now.plusHours(1))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
             itemRepository.save(item1);
 
@@ -268,6 +282,7 @@ class ItemRepositoryTest {
                 .startPrice(20000L)
                 .endTime(now.plusHours(2))
                 .seller(seller1)
+                .category(Category.ELECTRONICS)
                 .build();
             itemRepository.save(item2);
 
@@ -291,6 +306,7 @@ class ItemRepositoryTest {
                     .startPrice(10000L * i)
                     .endTime(now.plusHours(i))
                     .seller(seller1)
+                    .category(Category.ELECTRONICS)
                     .build();
                 itemRepository.save(item);
             }
@@ -315,6 +331,7 @@ class ItemRepositoryTest {
                 .startPrice(10000L)
                 .endTime(now.plusHours(1))
                 .seller(seller2)
+                .category(Category.ELECTRONICS)
                 .build();
 
             Item seller2Item2 = Item.builder()
@@ -323,6 +340,7 @@ class ItemRepositoryTest {
                 .startPrice(20000L)
                 .endTime(now.plusHours(2))
                 .seller(seller2)
+                .category(Category.ELECTRONICS)
                 .build();
 
             itemRepository.saveAll(List.of(seller2Item1, seller2Item2));

@@ -57,8 +57,11 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div th:each="auction : ${auctions}" class="auction-card bg-[#1E1E1E] rounded-2xl overflow-hidden border border-gray-800 flex flex-col">
             <div class="h-52 bg-gray-800 relative">
-                <div class="absolute top-3 left-3 bg-red-600 px-3 py-1 rounded-full text-[10px] font-bold flex items-center">
-                    <span class="w-1.5 h-1.5 bg-white rounded-full mr-2 animate-pulse"></span> LIVE
+                <div class="absolute top-3 left-3 flex items-center space-x-2">
+                    <div class="bg-red-600 px-3 py-1 rounded-full text-[10px] font-bold flex items-center">
+                        <span class="w-1.5 h-1.5 bg-white rounded-full mr-2 animate-pulse"></span> LIVE
+                    </div>
+                    <span th:text="${auction.category}" class="bg-gray-700 px-2 py-1 rounded-full text-[10px] font-bold">카테고리</span>
                 </div>
                 <img th:src="${auction.imageUrl}" class="w-full h-full object-cover" alt="Product Image">
             </div>
