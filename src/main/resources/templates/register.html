@@ -33,24 +33,46 @@
             <input type="text" name="title" required placeholder="무엇을 판매하시겠습니까?" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]">
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm text-gray-400 mb-2">시작가 (₩)</label>
-                <input type="number" name="startPrice" required class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono focus:outline-none focus:border-[#007AFF]">
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">시작가 (₩)</label>
+
+            <!-- 금액 표시 영역 -->
+            <div class="flex items-center bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 mb-3">
+                <input type="text"
+                       id="priceDisplay"
+                       readonly
+                       value="0"
+                       class="flex-1 bg-transparent font-mono text-xl text-right focus:outline-none">
+                <span class="text-gray-400 ml-2">원</span>
             </div>
-            <div>
-                <label class="block text-sm text-gray-400 mb-2">경매 기간 (시간)</label>
-                <div class="relative">
-                    <select name="duration" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono text-sm focus:outline-none focus:border-[#007AFF] appearance-none cursor-pointer">
-                        <script>
-                            for(let i=1; i<=48; i++) {
-                                document.write(`<option value="${i}">${i}시간 후 종료</option>`);
-                            }
-                        </script>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
+            <input type="hidden" name="startPrice" id="startPriceHidden" value="0">
+
+            <!-- 금액 단위 버튼들 -->
+            <div class="flex flex-wrap gap-2 mb-2">
+                <button type="button" onclick="addPrice(1000)" class="px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] hover:text-[#007AFF] transition-colors">+1천</button>
+                <button type="button" onclick="addPrice(5000)" class="px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] hover:text-[#007AFF] transition-colors">+5천</button>
+                <button type="button" onclick="addPrice(10000)" class="px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] hover:text-[#007AFF] transition-colors">+1만</button>
+                <button type="button" onclick="addPrice(50000)" class="px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] hover:text-[#007AFF] transition-colors">+5만</button>
+                <button type="button" onclick="addPrice(100000)" class="px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] hover:text-[#007AFF] transition-colors">+10만</button>
+                <button type="button" onclick="addPrice(1000000)" class="px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] hover:text-[#007AFF] transition-colors">+100만</button>
+            </div>
+
+            <!-- 초기화 버튼 -->
+            <button type="button" onclick="resetPrice()" class="px-3 py-2 bg-gray-700 rounded-lg text-sm font-medium hover:bg-gray-600 transition-colors">초기화</button>
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-2">경매 기간 (시간)</label>
+            <div class="relative">
+                <select name="duration" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono text-sm focus:outline-none focus:border-[#007AFF] appearance-none cursor-pointer">
+                    <script>
+                        for(let i=1; i<=48; i++) {
+                            document.write(`<option value="${i}">${i}시간 후 종료</option>`);
+                        }
+                    </script>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
                 </div>
             </div>
         </div>
@@ -76,6 +98,24 @@
 
     // 파일 누적 관리를 위한 전역 DataTransfer 객체
     let allFiles = new DataTransfer();
+
+    // 시작가 관리
+    let currentPrice = 0;
+
+    function addPrice(amount) {
+        currentPrice += amount;
+        updatePriceDisplay();
+    }
+
+    function resetPrice() {
+        currentPrice = 0;
+        updatePriceDisplay();
+    }
+
+    function updatePriceDisplay() {
+        document.getElementById('priceDisplay').value = currentPrice.toLocaleString('ko-KR');
+        document.getElementById('startPriceHidden').value = currentPrice;
+    }
 
     // 1. 드래그 앤 드롭 및 클릭 이벤트 설정
     dropZone.addEventListener('click', () => fileInput.click());
@@ -171,6 +211,12 @@
 
     // 5. 폼 제출 시 최종 설정
     form.onsubmit = () => {
+        // 시작가 검증
+        if (currentPrice < 1000) {
+            alert('시작가는 최소 1,000원 이상이어야 합니다.');
+            return false;
+        }
+
         // 백엔드 컨트롤러의 MultipartFile[] 매개변수 이름과 일치하도록 설정
         fileInput.name = "imageFiles";
         return true;
