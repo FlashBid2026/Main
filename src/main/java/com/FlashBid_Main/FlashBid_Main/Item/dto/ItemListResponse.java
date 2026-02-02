@@ -20,6 +20,7 @@ public class ItemListResponse {
   private String imageUrl;
   private Long currentPrice;
   private String remainingTime;
+  private String endTime;
   private String category;
 
   public static ItemListResponse from(Item item) {
@@ -29,6 +30,7 @@ public class ItemListResponse {
         .imageUrl(extractImageUrl(item))
         .currentPrice(item.getCurrentPrice())
         .remainingTime(calculateRemainingTime(item.getEndTime()))
+        .endTime(item.getEndTime().toString())
         .category(item.getCategory().getDisplayName())
         .build();
   }

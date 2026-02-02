@@ -74,7 +74,9 @@
                     </div>
                     <div class="text-right">
                         <p class="text-[10px] text-[#FF4D00] uppercase font-bold">남은 시간</p>
-                        <p class="font-mono text-sm" th:text="${auction.remainingTime}">00:00:00</p>
+                        <p class="countdown font-mono text-sm"
+                           th:data-end-time="${auction.endTime}"
+                           th:text="${auction.remainingTime}">00:00:00</p>
                     </div>
                 </div>
                 <a th:href="@{/auctions/{id}(id=${auction.id})}"
@@ -85,6 +87,44 @@
         </div>
     </div>
 </main>
+
+<!-- 카운트다운 스크립트 -->
+<script>
+(function() {
+    function updateCountdowns() {
+        document.querySelectorAll('.countdown').forEach(el => {
+            const endTimeStr = el.dataset.endTime;
+            if (!endTimeStr) return;
+
+            const endTime = new Date(endTimeStr);
+            const now = new Date();
+            const diff = endTime - now;
+
+            if (diff <= 0) {
+                el.textContent = '종료됨';
+                el.classList.add('text-gray-500');
+            } else {
+                const days = Math.floor(diff / 86400000);
+                if (days >= 1) {
+                    el.textContent = days + '일 남음';
+                } else {
+                    const hours = Math.floor(diff / 3600000);
+                    const minutes = Math.floor((diff % 3600000) / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    el.textContent = String(hours).padStart(2, '0') + ':' +
+                                     String(minutes).padStart(2, '0') + ':' +
+                                     String(seconds).padStart(2, '0');
+                }
+            }
+        });
+    }
+
+    // 초기 실행 및 1초마다 업데이트
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
+})();
+</script>
+
 <!-- 경매 등록 모달 -->
 <div id="register-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-start justify-center p-4 overflow-y-auto">
     <div class="relative max-w-xl w-full my-8 bg-[#1E1E1E] p-10 rounded-3xl shadow-2xl border border-gray-800">
