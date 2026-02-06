@@ -29,7 +29,10 @@ public class User {
   private String nickname;
 
   @Column(nullable = false)
-  private Long point = 100000L;
+  private Long availablePoint = 100000L;
+
+  @Column(nullable = false)
+  private Long lockedPoint = 0L;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -43,22 +46,35 @@ public class User {
   private LocalDateTime updatedAt;
 
   @Builder
-  public User(String userId, String password, String nickname, Long point, UserRole role) {
+  public User(String userId, String password, String nickname, Long availablePoint, UserRole role) {
     this.userId = userId;
     this.password = password;
     this.nickname = nickname;
-    this.point = (point != null) ? point : 100000L;
+    this.availablePoint = (availablePoint != null) ? availablePoint : 100000L;
+    this.lockedPoint = 0L;
     this.role = (role != null) ? role : UserRole.USER;
   }
 
-  public void deductPoint(Long amount) {
-    if (this.point < amount) {
-      throw new IllegalArgumentException("잔액이 부족합니다.");
+  public void lockPoint(Long amount) {
+    if (this.availablePoint < amount) {
+      throw new IllegalArgumentException("사용 가능한 잔액이 부족합니다.");
     }
-    this.point -= amount;
+    this.availablePoint -= amount;
+    this.lockedPoint += amount;
   }
 
-  public void addPoint(Long amount) {
-    this.point += amount;
+  public void unlockPoint(Long amount) {
+    if (this.lockedPoint < amount) {
+      throw new IllegalStateException("복구할 잠금 포인트가 부족합니다.");
+    }
+    this.lockedPoint -= amount;
+    this.availablePoint += amount;
+  }
+
+  public void confirmPayment(Long amount) {
+    if (this.lockedPoint < amount) {
+      throw new IllegalStateException("결제할 잠금 포인트가 부족합니다.");
+    }
+    this.lockedPoint -= amount;
   }
 }
