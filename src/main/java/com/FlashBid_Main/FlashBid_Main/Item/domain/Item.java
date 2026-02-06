@@ -39,6 +39,10 @@ public class Item {
   private LocalDateTime endTime;
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "current_winner_id")
+  private User currentWinner;
+
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "seller_id")
   private User seller;
 
@@ -62,5 +66,10 @@ public class Item {
   public void addImage(ItemImage image) {
     this.images.add(image);
     image.setItem(this);
+  }
+
+  public void updateBid(User newWinner, Long newPrice) {
+    this.currentWinner = newWinner;
+    this.currentPrice = newPrice;
   }
 }
