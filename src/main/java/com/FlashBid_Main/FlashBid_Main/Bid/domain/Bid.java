@@ -1,6 +1,7 @@
-package com.FlashBid_Main.FlashBid_Main.Item.domain;
+package com.FlashBid_Main.FlashBid_Main.Bid.domain;
 
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
+import com.FlashBid_Main.FlashBid_Main.Item.domain.Item;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
