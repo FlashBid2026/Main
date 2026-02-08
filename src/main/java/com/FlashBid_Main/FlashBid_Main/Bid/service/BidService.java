@@ -28,7 +28,7 @@ public class BidService {
   private final UserRepository userRepository;
   private final BidRepository bidRepository;
   private final OutboxRepository outboxRepository;
-  private final ObjectMapper objectMapper; // JSON 변환용
+  private final ObjectMapper objectMapper;
 
   @Transactional
   public BidResponse placeBid(BidRequest request, Long userId) {
