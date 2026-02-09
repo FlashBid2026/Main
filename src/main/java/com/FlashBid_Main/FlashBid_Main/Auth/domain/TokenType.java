@@ -2,7 +2,8 @@ package com.FlashBid_Main.FlashBid_Main.Auth.domain;
 
 public enum TokenType {
     ACCESS("access"),
-    REFRESH("refresh");
+    REFRESH("refresh"),
+    RANKING("ranking");
 
     private final String value;
 

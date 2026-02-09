@@ -89,6 +89,49 @@ public class JwtTokenProvider {
         return builder.compact();
     }
 
+    public String createRankingToken(String userId, String nickname, String roomId) {
+        Date now = new Date();
+        Date expireDate = new Date(now.getTime() + accessExpiration);
+
+        return Jwts.builder()
+            .header()
+                .add("typ", "JWT")
+                .and()
+            .subject(userId)
+            .claim("token_type", TokenType.RANKING.getValue())
+            .claim("nickname", nickname)
+            .claim("roomId", roomId)
+            .issuedAt(now)
+            .expiration(expireDate)
+            .signWith(secretKey)
+            .compact();
+    }
+
+    public boolean validRankingToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+            String tokenType = claims.get("token_type", String.class);
+            return TokenType.RANKING.getValue().equals(tokenType);
+
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public String getRoomId(String token) {
+        return Jwts.parser()
+            .verifyWith(secretKey)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .get("roomId", String.class);
+    }
+
     public boolean validToken(String token) {
         try {
             Jwts.parser()

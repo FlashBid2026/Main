@@ -133,6 +133,37 @@ class JwtTokenProviderTest {
     }
 
     @Test
+    @DisplayName("RankingToken 생성 및 검증 성공")
+    void createRankingToken_Success() {
+        String roomId = "auction-room-123";
+
+        String token = jwtTokenProvider.createRankingToken(testUser.getUserId(), testUser.getNickname(), roomId);
+
+        assertThat(token).isNotNull();
+        assertThat(jwtTokenProvider.validRankingToken(token)).isTrue();
+        assertThat(jwtTokenProvider.getUserId(token)).isEqualTo(testUser.getUserId());
+        assertThat(jwtTokenProvider.getNickname(token)).isEqualTo(testUser.getNickname());
+        assertThat(jwtTokenProvider.getRoomId(token)).isEqualTo(roomId);
+        assertThat(jwtTokenProvider.getTokenType(token)).isEqualTo(TokenType.RANKING);
+    }
+
+    @Test
+    @DisplayName("RankingToken을 AccessToken으로 검증 시 실패")
+    void validateRankingTokenAsAccess_Fail() {
+        String token = jwtTokenProvider.createRankingToken(testUser.getUserId(), testUser.getNickname(), "room-1");
+
+        assertThat(jwtTokenProvider.validAccessToken(token)).isFalse();
+    }
+
+    @Test
+    @DisplayName("AccessToken을 RankingToken으로 검증 시 실패")
+    void validateAccessTokenAsRanking_Fail() {
+        String accessToken = jwtTokenProvider.createAccessToken(testUser.getUserId(), testUser.getNickname(), List.of("USER"));
+
+        assertThat(jwtTokenProvider.validRankingToken(accessToken)).isFalse();
+    }
+
+    @Test
     @DisplayName("RefreshToken Redis TTL 만료 시 검증 실패")
     void validRefreshToken_ReturnsFalse_WhenRedisTtlExpires() {
         String refreshToken = jwtTokenProvider.createRefreshToken(testUser.getUserId(), testLocation);

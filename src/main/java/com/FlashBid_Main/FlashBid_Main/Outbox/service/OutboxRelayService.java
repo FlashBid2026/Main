@@ -38,7 +38,6 @@ public class OutboxRelayService {
 
     for (Outbox outbox : unprocessedEvents) {
       try {
-        // RabbitMQ로 메시지 발행
         String routingKey = "auction.bid." + outbox.getEventType().name().toLowerCase();
         rabbitTemplate.convertAndSend(
             RabbitConfig.EXCHANGE_NAME,
