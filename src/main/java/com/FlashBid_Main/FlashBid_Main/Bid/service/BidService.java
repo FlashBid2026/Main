@@ -34,7 +34,6 @@ public class BidService {
   public BidResponse placeBid(BidRequest request, String userId) {
     // 로컬 캐시 및 Redis 필터링 (나중에 추가)
 
-    // 비관적 락을 사용하여 Item 조회 (동시성 제어의 핵심)
     Item item = itemRepository.findByIdWithPessimisticLock(request.itemId())
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다."));
 
