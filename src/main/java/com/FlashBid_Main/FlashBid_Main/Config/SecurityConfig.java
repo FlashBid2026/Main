@@ -39,7 +39,13 @@ public class SecurityConfig {
 
         .exceptionHandling(handler -> handler
             .authenticationEntryPoint((request, response, authException) -> {
-              response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+              String requestedWith = request.getHeader("X-Requested-With");
+              String uri = request.getRequestURI();
+              if (uri.startsWith("/api/") || "XMLHttpRequest".equals(requestedWith)) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+              } else {
+                response.sendRedirect("/login");
+              }
             })
         )
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

@@ -12,19 +12,69 @@
     </style>
 </head>
 <body class="bg-[#121212] text-white flex flex-col h-screen">
+
+<div id="auction-data"
+     th:data-item-id="${auction.id}"
+     th:data-current-price="${auction.currentPrice}"
+     th:data-start-price="${auction.startPrice}"
+     th:data-end-time="${auction.endTime}"
+     th:data-user-nickname="${userNickname}"
+     style="display:none;"></div>
+
 <div class="bg-[#1E1E1E] p-4 flex justify-between items-center border-b border-gray-800">
-    <a th:href="@{/}" class="text-gray-400">← 나가기</a>
-    <h2 class="font-bold text-lg" th:text="${auction.title}">한정판 피규어 경매</h2>
+    <a th:href="@{/}" class="text-gray-400">&larr; 나가기</a>
+    <h2 class="font-bold text-lg" th:text="${auction.title}">경매 상품</h2>
     <div class="bg-red-900 px-4 py-1 rounded-full text-red-400 font-mono font-bold bg-pulse">
-        마감 00:03:45
+        마감 <span id="countdown">--:--:--</span>
     </div>
 </div>
 
 <div class="flex flex-1 overflow-hidden">
     <div class="flex-1 p-6 flex flex-col space-y-4 overflow-y-auto">
-        <div class="bg-[#1E1E1E] p-2 rounded-2xl">
-            <img th:src="${auction.imageUrl}" class="w-full h-96 object-contain">
+        <div class="bg-[#1E1E1E] p-2 rounded-2xl relative">
+            <img id="carousel-img" th:src="${auction.imageUrls[0]}" class="w-full h-96 object-contain">
+            <button id="carousel-prev" onclick="carouselPrev()"
+                    th:if="${#lists.size(auction.imageUrls) > 1}"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full text-xl">&larr;</button>
+            <button id="carousel-next" onclick="carouselNext()"
+                    th:if="${#lists.size(auction.imageUrls) > 1}"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full text-xl">&rarr;</button>
+            <div th:if="${#lists.size(auction.imageUrls) > 1}"
+                 class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                <span th:each="url, iter : ${auction.imageUrls}"
+                      th:classappend="${iter.index == 0} ? 'bg-[#FF4D00]' : 'bg-gray-500'"
+                      class="carousel-dot w-3 h-3 rounded-full cursor-pointer inline-block"
+                      th:data-index="${iter.index}"
+                      onclick="carouselGoTo(this.dataset.index)"></span>
+            </div>
         </div>
+
+        <div class="bg-[#1E1E1E] p-6 rounded-2xl">
+            <h3 class="text-xl font-bold mb-4">상품 정보</h3>
+            <div class="space-y-3 text-sm text-gray-300">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">카테고리</span>
+                    <span th:text="${auction.category}">카테고리</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">판매자</span>
+                    <span th:text="${auction.sellerNickname}">판매자</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">시작가</span>
+                    <span th:text="${#numbers.formatInteger(auction.startPrice, 0, 'COMMA')} + ' 원'">10,000 원</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">현재가</span>
+                    <span id="display-current-price" class="text-[#00FFA3] font-bold"
+                          th:text="${#numbers.formatInteger(auction.currentPrice, 0, 'COMMA')} + ' 원'">10,000 원</span>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-800">
+                <p class="text-gray-300 text-sm whitespace-pre-line" th:text="${auction.description}">상품 설명</p>
+            </div>
+        </div>
+
         <div class="bg-[#1E1E1E] p-6 rounded-2xl h-full">
             <h3 class="text-xl font-bold mb-4">실시간 채팅</h3>
             <div id="chat-window" class="h-48 overflow-y-auto mb-4 space-y-2 text-sm text-gray-300">
@@ -34,23 +84,19 @@
     </div>
 
     <div class="w-96 bg-[#181818] p-6 border-l border-gray-800 flex flex-col">
-        <h3 class="text-[#FF4D00] font-black text-xl mb-6 italic italic">REAL-TIME RANKING</h3>
+        <h3 class="text-[#FF4D00] font-black text-xl mb-6 italic">REAL-TIME RANKING</h3>
         <div id="leaderboard" class="space-y-3 flex-1">
-            <div th:each="bidder, iter : ${bidders}"
-                 th:classappend="${bidder.userId == session.userId} ? 'my-rank' : ''"
-                 class="leaderboard-item bg-[#252525] p-4 rounded-xl flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <span class="font-mono italic text-gray-500" th:text="${iter.count}">1</span>
-                    <span class="font-bold" th:text="${bidder.nickname}">사용자닉네임</span>
-                </div>
-                <span class="font-mono font-bold text-[#00FFA3]" th:text="${#numbers.formatInteger(bidder.price, 0, 'COMMA')}">75,000</span>
-            </div>
+            <div class="text-gray-500 text-center py-8">로딩 중...</div>
         </div>
 
         <div class="mt-6 pt-6 border-t border-gray-800">
+            <div id="bid-status" class="text-center text-sm mb-3 hidden"></div>
             <div class="grid grid-cols-2 gap-2 mb-4">
-                <button class="bg-[#2A2A2A] py-2 rounded font-mono hover:bg-gray-700">+1,000</button>
-                <button class="bg-[#2A2A2A] py-2 rounded font-mono hover:bg-gray-700">+5,000</button>
+                <button id="btn-add-1000" class="bg-[#2A2A2A] py-2 rounded font-mono hover:bg-gray-700">+1,000</button>
+                <button id="btn-add-5000" class="bg-[#2A2A2A] py-2 rounded font-mono hover:bg-gray-700">+5,000</button>
+            </div>
+            <div class="text-center text-sm text-gray-400 mb-3">
+                입찰가: <span id="bid-amount-display" class="text-white font-bold">0</span> 원
             </div>
             <button id="bid-button" class="w-full bg-[#FF4D00] py-4 rounded-xl text-xl font-black shadow-lg shadow-orange-900/20 active:scale-95 transition">
                 BID NOW
@@ -58,5 +104,222 @@
         </div>
     </div>
 </div>
+
+<script th:inline="javascript">
+    var imageUrls = /*[[${auction.imageUrls}]]*/ [];
+    var currentIndex = 0;
+
+    function carouselUpdate() {
+        var img = document.getElementById('carousel-img');
+        if (img) img.src = imageUrls[currentIndex];
+        var dots = document.querySelectorAll('.carousel-dot');
+        dots.forEach(function(dot, i) {
+            dot.classList.remove('bg-[#FF4D00]', 'bg-gray-500');
+            dot.classList.add(i === currentIndex ? 'bg-[#FF4D00]' : 'bg-gray-500');
+        });
+    }
+
+    function carouselPrev() {
+        currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+        carouselUpdate();
+    }
+
+    function carouselNext() {
+        currentIndex = (currentIndex + 1) % imageUrls.length;
+        carouselUpdate();
+    }
+
+    function carouselGoTo(index) {
+        currentIndex = parseInt(index);
+        carouselUpdate();
+    }
+</script>
+
+<script>
+(function() {
+    const data = document.getElementById('auction-data');
+    const itemId = data.dataset.itemId;
+    const userNickname = data.dataset.userNickname;
+    let currentPrice = parseInt(data.dataset.currentPrice) || 0;
+    const endTime = new Date(data.dataset.endTime);
+    let bidAmount = 0;
+    let sseSource = null;
+
+    // --- Countdown Timer ---
+    const countdownEl = document.getElementById('countdown');
+    function updateCountdown() {
+        const now = new Date();
+        const diff = endTime - now;
+        if (diff <= 0) {
+            countdownEl.textContent = '종료됨';
+            return;
+        }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        countdownEl.textContent =
+            String(h).padStart(2, '0') + ':' +
+            String(m).padStart(2, '0') + ':' +
+            String(s).padStart(2, '0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // --- Ranking Token + SSE ---
+    function acquireTokenAndConnect() {
+        fetch('/api/ranking/token?roomId=' + itemId, {
+            method: 'POST',
+            credentials: 'same-origin'
+        }).then(function(res) {
+            if (res.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            if (!res.ok) {
+                console.error('Ranking token failed:', res.status);
+                return;
+            }
+            connectSSE();
+        }).catch(function(err) {
+            console.error('Ranking token error:', err);
+        });
+    }
+
+    function connectSSE() {
+        if (sseSource) {
+            sseSource.close();
+        }
+        sseSource = new EventSource('/api/ranking/stream?roomId=' + itemId);
+
+        sseSource.onmessage = function(event) {
+            try {
+                var rankings = JSON.parse(event.data);
+                renderLeaderboard(rankings);
+            } catch (e) {
+                console.error('SSE parse error:', e);
+            }
+        };
+
+        sseSource.onerror = function() {
+            console.error('SSE connection error');
+        };
+    }
+
+    function renderLeaderboard(rankings) {
+        var container = document.getElementById('leaderboard');
+
+        if (!rankings || rankings.length === 0) {
+            container.innerHTML = '<div class="text-gray-500 text-center py-8">아직 입찰이 없습니다</div>';
+            return;
+        }
+
+        var html = '';
+        for (var i = 0; i < rankings.length; i++) {
+            var entry = rankings[i];
+            var rank = entry.rank || (i + 1);
+            var isMe = entry.nickname === userNickname;
+            var myClass = isMe ? ' my-rank' : '';
+            var price = Number(entry.bidPrice).toLocaleString();
+
+            html +=
+                '<div class="leaderboard-item bg-[#252525] p-4 rounded-xl flex justify-between items-center' + myClass + '">' +
+                    '<div class="flex items-center space-x-3">' +
+                        '<span class="font-mono italic text-gray-500">' + rank + '</span>' +
+                        '<span class="font-bold">' + escapeHtml(entry.nickname) + '</span>' +
+                    '</div>' +
+                    '<span class="font-mono font-bold text-[#00FFA3]">' + price + '</span>' +
+                '</div>';
+
+            if (isMe && entry.bidPrice) {
+                currentPrice = Math.max(currentPrice, Number(entry.bidPrice));
+            }
+        }
+        container.innerHTML = html;
+
+        if (rankings.length > 0) {
+            var topPrice = Number(rankings[0].bidPrice);
+            if (topPrice > currentPrice) {
+                currentPrice = topPrice;
+                updateCurrentPriceDisplay();
+            }
+        }
+    }
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
+
+    function updateCurrentPriceDisplay() {
+        var el = document.getElementById('display-current-price');
+        if (el) {
+            el.textContent = currentPrice.toLocaleString() + ' 원';
+        }
+    }
+
+    // --- Bid Buttons ---
+    function updateBidDisplay() {
+        document.getElementById('bid-amount-display').textContent = bidAmount.toLocaleString();
+    }
+
+    document.getElementById('btn-add-1000').addEventListener('click', function() {
+        bidAmount = currentPrice + 1000;
+        updateBidDisplay();
+    });
+
+    document.getElementById('btn-add-5000').addEventListener('click', function() {
+        bidAmount = currentPrice + 5000;
+        updateBidDisplay();
+    });
+
+    document.getElementById('bid-button').addEventListener('click', function() {
+        if (bidAmount <= 0) {
+            showBidStatus('입찰 금액을 선택해주세요', false);
+            return;
+        }
+
+        var btn = document.getElementById('bid-button');
+        btn.disabled = true;
+        btn.textContent = '입찰 중...';
+
+        fetch('/api/bids', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ itemId: parseInt(itemId), bidAmount: bidAmount })
+        }).then(function(res) {
+            return res.json();
+        }).then(function(data) {
+            if (data.success) {
+                showBidStatus('입찰 성공! 현재가: ' + Number(data.currentPrice).toLocaleString() + ' 원', true);
+                currentPrice = data.currentPrice;
+                updateCurrentPriceDisplay();
+                bidAmount = 0;
+                updateBidDisplay();
+            } else {
+                showBidStatus(data.message || '입찰에 실패했습니다', false);
+            }
+        }).catch(function(err) {
+            showBidStatus('입찰 요청 중 오류가 발생했습니다', false);
+            console.error('Bid error:', err);
+        }).finally(function() {
+            btn.disabled = false;
+            btn.textContent = 'BID NOW';
+        });
+    });
+
+    function showBidStatus(message, success) {
+        var el = document.getElementById('bid-status');
+        el.textContent = message;
+        el.className = 'text-center text-sm mb-3 ' + (success ? 'text-[#00FFA3]' : 'text-red-400');
+        el.classList.remove('hidden');
+        setTimeout(function() { el.classList.add('hidden'); }, 4000);
+    }
+
+    // --- Initialize ---
+    acquireTokenAndConnect();
+})();
+</script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import com.FlashBid_Main.FlashBid_Main.Gcs.service.GcsService;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.Item;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.ItemImage;
+import com.FlashBid_Main.FlashBid_Main.Item.dto.ItemDetailResponse;
 import com.FlashBid_Main.FlashBid_Main.Item.dto.ItemListResponse;
 import com.FlashBid_Main.FlashBid_Main.Item.dto.ItemRegistrationDto;
 import com.FlashBid_Main.FlashBid_Main.Item.repository.ItemRepository;
@@ -49,6 +50,12 @@ public class ItemService {
     }
 
     return itemRepository.save(item).getId();
+  }
+
+  public ItemDetailResponse getItemDetail(Long itemId) {
+    Item item = itemRepository.findById(itemId)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 경매 상품입니다."));
+    return ItemDetailResponse.from(item);
   }
 
   public List<ItemListResponse> getActiveItemsForHome() {
