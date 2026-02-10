@@ -31,7 +31,7 @@ public class BidService {
   private final ObjectMapper objectMapper;
 
   @Transactional
-  public BidResponse placeBid(BidRequest request, Long userId) {
+  public BidResponse placeBid(BidRequest request, String userId) {
     // 로컬 캐시 및 Redis 필터링 (나중에 추가)
 
     // 비관적 락을 사용하여 Item 조회 (동시성 제어의 핵심)
@@ -48,7 +48,7 @@ public class BidService {
       return new BidResponse(false, "현재 최고가보다 높은 금액을 입찰해야 합니다.", item.getCurrentPrice(), null);
     }
 
-    User newWinner = userRepository.findById(userId)
+    User newWinner = userRepository.findByUserId(userId)
         .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
     // 이전 최고가 유저가 있다면 돈을 Unlock 해줍니다.

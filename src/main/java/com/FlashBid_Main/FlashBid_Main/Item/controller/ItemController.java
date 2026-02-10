@@ -1,6 +1,6 @@
 package com.FlashBid_Main.FlashBid_Main.Item.controller;
 
-import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.CustomUserDetails;
 import com.FlashBid_Main.FlashBid_Main.Item.dto.ItemRegistrationDto;
 import com.FlashBid_Main.FlashBid_Main.Item.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +22,9 @@ public class ItemController {
 
   @PostMapping("/register")
   public ResponseEntity<String> register(@ModelAttribute ItemRegistrationDto dto,
-                                         @AuthenticationPrincipal User user) {
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
-      Long itemId = itemService.registerItem(dto, user);
+      Long itemId = itemService.registerItem(dto, userDetails.getUserId());
       return ResponseEntity.ok("물품 등록 성공! ID: " + itemId);
     } catch (IOException e) {
       return ResponseEntity.status(500).body("등록 실패: " + e.getMessage());

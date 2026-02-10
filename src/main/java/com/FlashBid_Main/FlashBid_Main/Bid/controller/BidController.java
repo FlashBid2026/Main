@@ -1,6 +1,6 @@
 package com.FlashBid_Main.FlashBid_Main.Bid.controller;
 
-import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.CustomUserDetails;
 import com.FlashBid_Main.FlashBid_Main.Bid.dto.BidRequest;
 import com.FlashBid_Main.FlashBid_Main.Bid.dto.BidResponse;
 import com.FlashBid_Main.FlashBid_Main.Bid.service.BidService;
@@ -22,9 +22,9 @@ public class BidController {
   @PostMapping
   public ResponseEntity<BidResponse> placeBid(
       @RequestBody BidRequest request,
-      @AuthenticationPrincipal User user
+      @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
-    BidResponse response = bidService.placeBid(request, user.getId());
+    BidResponse response = bidService.placeBid(request, userDetails.getUserId());
     return ResponseEntity.ok(response);
   }
 }

@@ -109,10 +109,10 @@ class BidServiceTest {
         @DisplayName("정상 입찰 시 성공 응답 반환")
         void placeBid_ValidBid_ReturnsSuccessResponse() throws JsonProcessingException {
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.of(testUser));
             given(objectMapper.writeValueAsString(any())).willReturn("{}");
 
-            BidResponse response = bidService.placeBid(bidRequest, 1L);
+            BidResponse response = bidService.placeBid(bidRequest, "test@test.com");
 
             assertThat(response.success()).isTrue();
             assertThat(response.message()).isEqualTo("입찰에 성공했습니다!");
@@ -129,10 +129,10 @@ class BidServiceTest {
             Long previousLockedPoint = previousWinner.getLockedPoint();
 
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.of(testUser));
             given(objectMapper.writeValueAsString(any())).willReturn("{}");
 
-            bidService.placeBid(bidRequest, 1L);
+            bidService.placeBid(bidRequest, "test@test.com");
 
             assertThat(previousWinner.getLockedPoint()).isEqualTo(previousLockedPoint - 10000L);
             assertThat(previousWinner.getAvailablePoint()).isEqualTo(50000L);
@@ -145,10 +145,10 @@ class BidServiceTest {
             Long initialLockedPoint = testUser.getLockedPoint();
 
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.of(testUser));
             given(objectMapper.writeValueAsString(any())).willReturn("{}");
 
-            bidService.placeBid(bidRequest, 1L);
+            bidService.placeBid(bidRequest, "test@test.com");
 
             assertThat(testUser.getAvailablePoint()).isEqualTo(initialAvailablePoint - 15000L);
             assertThat(testUser.getLockedPoint()).isEqualTo(initialLockedPoint + 15000L);
@@ -158,10 +158,10 @@ class BidServiceTest {
         @DisplayName("Item.updateBid() 호출 검증")
         void placeBid_ValidBid_UpdatesItemBidInfo() throws JsonProcessingException {
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.of(testUser));
             given(objectMapper.writeValueAsString(any())).willReturn("{}");
 
-            bidService.placeBid(bidRequest, 1L);
+            bidService.placeBid(bidRequest, "test@test.com");
 
             assertThat(testItem.getCurrentPrice()).isEqualTo(15000L);
             assertThat(testItem.getCurrentWinner()).isEqualTo(testUser);
@@ -171,10 +171,10 @@ class BidServiceTest {
         @DisplayName("Bid 기록 저장 검증")
         void placeBid_ValidBid_SavesBidRecord() throws JsonProcessingException {
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.of(testUser));
             given(objectMapper.writeValueAsString(any())).willReturn("{}");
 
-            bidService.placeBid(bidRequest, 1L);
+            bidService.placeBid(bidRequest, "test@test.com");
 
             ArgumentCaptor<Bid> bidCaptor = ArgumentCaptor.forClass(Bid.class);
             verify(bidRepository).save(bidCaptor.capture());
@@ -189,10 +189,10 @@ class BidServiceTest {
         @DisplayName("Outbox 이벤트 저장 검증")
         void placeBid_ValidBid_SavesOutboxEvent() throws JsonProcessingException {
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.of(testUser));
             given(objectMapper.writeValueAsString(any())).willReturn("{}");
 
-            bidService.placeBid(bidRequest, 1L);
+            bidService.placeBid(bidRequest, "test@test.com");
 
             ArgumentCaptor<Outbox> outboxCaptor = ArgumentCaptor.forClass(Outbox.class);
             verify(outboxRepository).save(outboxCaptor.capture());
@@ -214,7 +214,7 @@ class BidServiceTest {
 
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
 
-            BidResponse response = bidService.placeBid(bidRequest, 1L);
+            BidResponse response = bidService.placeBid(bidRequest, "test@test.com");
 
             assertThat(response.success()).isFalse();
             assertThat(response.message()).isEqualTo("경매가 이미 종료되었습니다.");
@@ -228,10 +228,10 @@ class BidServiceTest {
 
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
 
-            bidService.placeBid(bidRequest, 1L);
+            bidService.placeBid(bidRequest, "test@test.com");
 
             assertThat(testItem.getCurrentPrice()).isEqualTo(initialPrice);
-            verify(userRepository, never()).findById(any());
+            verify(userRepository, never()).findByUserId(any());
             verify(bidRepository, never()).save(any());
             verify(outboxRepository, never()).save(any());
         }
@@ -249,7 +249,7 @@ class BidServiceTest {
 
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
 
-            BidResponse response = bidService.placeBid(lowBidRequest, 1L);
+            BidResponse response = bidService.placeBid(lowBidRequest, "test@test.com");
 
             assertThat(response.success()).isFalse();
             assertThat(response.message()).isEqualTo("현재 최고가보다 높은 금액을 입찰해야 합니다.");
@@ -263,7 +263,7 @@ class BidServiceTest {
 
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
 
-            BidResponse response = bidService.placeBid(equalBidRequest, 1L);
+            BidResponse response = bidService.placeBid(equalBidRequest, "test@test.com");
 
             assertThat(response.success()).isFalse();
             assertThat(response.message()).isEqualTo("현재 최고가보다 높은 금액을 입찰해야 합니다.");
@@ -279,7 +279,7 @@ class BidServiceTest {
         void placeBid_ItemNotFound_ThrowsException() {
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> bidService.placeBid(bidRequest, 1L))
+            assertThatThrownBy(() -> bidService.placeBid(bidRequest, "test@test.com"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("존재하지 않는 상품입니다.");
         }
@@ -288,9 +288,9 @@ class BidServiceTest {
         @DisplayName("유저 미존재 시 예외 발생")
         void placeBid_UserNotFound_ThrowsException() {
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.empty());
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> bidService.placeBid(bidRequest, 1L))
+            assertThatThrownBy(() -> bidService.placeBid(bidRequest, "test@test.com"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("유저를 찾을 수 없습니다.");
         }
@@ -304,12 +304,12 @@ class BidServiceTest {
         @DisplayName("Outbox payload에 올바른 데이터 포함")
         void placeBid_OutboxEventContainsCorrectPayload() throws JsonProcessingException {
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.of(testUser));
 
             String expectedPayload = "{\"itemId\":1,\"winnerId\":1,\"bidPrice\":15000,\"winnerNickname\":\"testUser\"}";
             given(objectMapper.writeValueAsString(any())).willReturn(expectedPayload);
 
-            bidService.placeBid(bidRequest, 1L);
+            bidService.placeBid(bidRequest, "test@test.com");
 
             ArgumentCaptor<Outbox> outboxCaptor = ArgumentCaptor.forClass(Outbox.class);
             verify(outboxRepository).save(outboxCaptor.capture());
@@ -322,10 +322,10 @@ class BidServiceTest {
         @DisplayName("JSON 직렬화 실패 시 RuntimeException 발생")
         void placeBid_JsonProcessingException_ThrowsRuntimeException() throws JsonProcessingException {
             given(itemRepository.findByIdWithPessimisticLock(1L)).willReturn(Optional.of(testItem));
-            given(userRepository.findById(1L)).willReturn(Optional.of(testUser));
+            given(userRepository.findByUserId("test@test.com")).willReturn(Optional.of(testUser));
             given(objectMapper.writeValueAsString(any())).willThrow(new JsonProcessingException("직렬화 실패") {});
 
-            assertThatThrownBy(() -> bidService.placeBid(bidRequest, 1L))
+            assertThatThrownBy(() -> bidService.placeBid(bidRequest, "test@test.com"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("이벤트 페이로드 생성 실패");
         }

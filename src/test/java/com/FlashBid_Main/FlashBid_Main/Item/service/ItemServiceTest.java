@@ -2,6 +2,7 @@ package com.FlashBid_Main.FlashBid_Main.Item.service;
 
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
+import com.FlashBid_Main.FlashBid_Main.Auth.repository.UserRepository;
 import com.FlashBid_Main.FlashBid_Main.Gcs.service.GcsService;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.Category;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.Item;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,6 +36,9 @@ class ItemServiceTest {
 
     @Mock
     private ItemRepository itemRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private GcsService gcsService;
@@ -59,6 +64,8 @@ class ItemServiceTest {
         dto.setStartPrice(10000L);
         dto.setDurationHour(24);
         dto.setCategory(Category.ELECTRONICS);
+
+        when(userRepository.findByUserId("seller@test.com")).thenReturn(Optional.of(testSeller));
     }
 
     @Nested
@@ -85,7 +92,7 @@ class ItemServiceTest {
                 return item;
             });
 
-            Long result = itemService.registerItem(dto, testSeller);
+            Long result = itemService.registerItem(dto, "seller@test.com");
 
             verify(gcsService, times(2)).uploadImage(any(MultipartFile.class));
             verify(itemRepository, times(1)).save(any(Item.class));
@@ -108,7 +115,7 @@ class ItemServiceTest {
                 return item;
             });
 
-            itemService.registerItem(dto, testSeller);
+            itemService.registerItem(dto, "seller@test.com");
 
             verify(gcsService, never()).uploadImage(any(MultipartFile.class));
             verify(itemRepository, times(1)).save(any(Item.class));
@@ -130,7 +137,7 @@ class ItemServiceTest {
                 return item;
             });
 
-            itemService.registerItem(dto, testSeller);
+            itemService.registerItem(dto, "seller@test.com");
 
             verify(gcsService, never()).uploadImage(any(MultipartFile.class));
             verify(itemRepository, times(1)).save(any(Item.class));
@@ -150,7 +157,7 @@ class ItemServiceTest {
             when(gcsService.uploadImage(any(MultipartFile.class))).thenReturn("uuid-image.jpg");
             when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            itemService.registerItem(dto, testSeller);
+            itemService.registerItem(dto, "seller@test.com");
 
             verify(gcsService, times(1)).uploadImage(any(MultipartFile.class));
         }
@@ -165,7 +172,7 @@ class ItemServiceTest {
 
             when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            itemService.registerItem(dto, testSeller);
+            itemService.registerItem(dto, "seller@test.com");
 
             LocalDateTime afterCall = LocalDateTime.now();
 
@@ -185,7 +192,7 @@ class ItemServiceTest {
 
             when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            itemService.registerItem(dto, testSeller);
+            itemService.registerItem(dto, "seller@test.com");
 
             ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
             verify(itemRepository).save(itemCaptor.capture());
@@ -206,7 +213,7 @@ class ItemServiceTest {
             when(gcsService.uploadImage(image)).thenReturn("uploaded-file-name.jpg");
             when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            itemService.registerItem(dto, testSeller);
+            itemService.registerItem(dto, "seller@test.com");
 
             verify(gcsService).uploadImage(image);
         }
@@ -218,7 +225,7 @@ class ItemServiceTest {
 
             when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            itemService.registerItem(dto, testSeller);
+            itemService.registerItem(dto, "seller@test.com");
 
             verify(itemRepository, times(1)).save(any(Item.class));
         }
@@ -234,7 +241,7 @@ class ItemServiceTest {
             when(gcsService.uploadImage(any(MultipartFile.class)))
                 .thenThrow(new IOException("GCS 업로드 실패"));
 
-            assertThatThrownBy(() -> itemService.registerItem(dto, testSeller))
+            assertThatThrownBy(() -> itemService.registerItem(dto, "seller@test.com"))
                 .isInstanceOf(IOException.class)
                 .hasMessage("GCS 업로드 실패");
 
@@ -248,7 +255,7 @@ class ItemServiceTest {
 
             when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            itemService.registerItem(dto, testSeller);
+            itemService.registerItem(dto, "seller@test.com");
 
             ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
             verify(itemRepository).save(itemCaptor.capture());

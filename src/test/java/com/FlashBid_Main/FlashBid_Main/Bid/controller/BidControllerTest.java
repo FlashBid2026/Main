@@ -1,5 +1,6 @@
 package com.FlashBid_Main.FlashBid_Main.Bid.controller;
 
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.CustomUserDetails;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
 import com.FlashBid_Main.FlashBid_Main.Bid.dto.BidRequest;
@@ -42,12 +43,12 @@ class BidControllerTest {
     @MockitoBean
     private BidService bidService;
 
-    private User testUser;
+    private CustomUserDetails testUserDetails;
     private BidRequest bidRequest;
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder()
+        User testUser = User.builder()
             .userId("test@test.com")
             .password("password123")
             .nickname("testUser")
@@ -56,14 +57,15 @@ class BidControllerTest {
             .build();
         ReflectionTestUtils.setField(testUser, "id", 1L);
 
+        testUserDetails = CustomUserDetails.from(testUser);
         bidRequest = new BidRequest(1L, 15000L);
     }
 
     private UsernamePasswordAuthenticationToken createAuthentication() {
         return new UsernamePasswordAuthenticationToken(
-            testUser,
+            testUserDetails,
             null,
-            List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            testUserDetails.getAuthorities()
         );
     }
 
@@ -76,7 +78,7 @@ class BidControllerTest {
         void placeBid_Success_Returns200WithSuccessResponse() throws Exception {
             BidResponse successResponse = new BidResponse(true, "입찰에 성공했습니다!", 15000L, "testUser");
 
-            when(bidService.placeBid(any(BidRequest.class), eq(1L)))
+            when(bidService.placeBid(any(BidRequest.class), eq("test@test.com")))
                 .thenReturn(successResponse);
 
             mockMvc.perform(post("/api/bids")
@@ -95,7 +97,7 @@ class BidControllerTest {
         void placeBid_Success_ReturnsCorrectJsonStructure() throws Exception {
             BidResponse successResponse = new BidResponse(true, "입찰에 성공했습니다!", 20000L, "winner");
 
-            when(bidService.placeBid(any(BidRequest.class), eq(1L)))
+            when(bidService.placeBid(any(BidRequest.class), eq("test@test.com")))
                 .thenReturn(successResponse);
 
             mockMvc.perform(post("/api/bids")
@@ -114,7 +116,7 @@ class BidControllerTest {
         void placeBid_AuctionEnded_Returns200WithFailureResponse() throws Exception {
             BidResponse failureResponse = new BidResponse(false, "경매가 이미 종료되었습니다.", 10000L, null);
 
-            when(bidService.placeBid(any(BidRequest.class), eq(1L)))
+            when(bidService.placeBid(any(BidRequest.class), eq("test@test.com")))
                 .thenReturn(failureResponse);
 
             mockMvc.perform(post("/api/bids")
@@ -131,7 +133,7 @@ class BidControllerTest {
         void placeBid_InvalidBidAmount_Returns200WithFailureResponse() throws Exception {
             BidResponse failureResponse = new BidResponse(false, "현재 최고가보다 높은 금액을 입찰해야 합니다.", 20000L, null);
 
-            when(bidService.placeBid(any(BidRequest.class), eq(1L)))
+            when(bidService.placeBid(any(BidRequest.class), eq("test@test.com")))
                 .thenReturn(failureResponse);
 
             mockMvc.perform(post("/api/bids")
@@ -152,7 +154,7 @@ class BidControllerTest {
         @Test
         @DisplayName("상품 미존재 시 에러 반환")
         void placeBid_ItemNotFound_ReturnsError() throws Exception {
-            when(bidService.placeBid(any(BidRequest.class), eq(1L)))
+            when(bidService.placeBid(any(BidRequest.class), eq("test@test.com")))
                 .thenThrow(new IllegalArgumentException("존재하지 않는 상품입니다."));
 
             mockMvc.perform(post("/api/bids")
@@ -166,7 +168,7 @@ class BidControllerTest {
         @Test
         @DisplayName("유저 미존재 시 에러 반환")
         void placeBid_UserNotFound_ReturnsError() throws Exception {
-            when(bidService.placeBid(any(BidRequest.class), eq(1L)))
+            when(bidService.placeBid(any(BidRequest.class), eq("test@test.com")))
                 .thenThrow(new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
             mockMvc.perform(post("/api/bids")

@@ -1,7 +1,10 @@
 package com.FlashBid_Main.FlashBid_Main.Item.controller;
 
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.CustomUserDetails;
+import com.FlashBid_Main.FlashBid_Main.Auth.domain.UserRole;
 import com.FlashBid_Main.FlashBid_Main.Item.dto.ItemRegistrationDto;
 import com.FlashBid_Main.FlashBid_Main.Item.service.ItemService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,18 +12,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 @SpringBootTest
 @AutoConfigureMockMvc
 class ItemControllerTest {
@@ -31,6 +35,21 @@ class ItemControllerTest {
     @MockitoBean
     private ItemService itemService;
 
+    private CustomUserDetails testUserDetails;
+
+    @BeforeEach
+    void setUp() {
+        testUserDetails = new CustomUserDetails(
+            "test@example.com", "password", "testUser",
+            List.of(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+    }
+
+    private UsernamePasswordAuthenticationToken createAuthentication() {
+        return new UsernamePasswordAuthenticationToken(
+            testUserDetails, null, testUserDetails.getAuthorities()
+        );
+    }
 
     @Nested
     @DisplayName("POST /api/items/register - 인증된 사용자")
@@ -39,11 +58,6 @@ class ItemControllerTest {
         @Test
         @DisplayName("물품 등록 성공 - 200 OK 및 성공 메시지 반환")
         void register_Success_Returns200() throws Exception {
-            UserDetails testUser = User.withUsername("test@example.com")
-                .password("password")
-                .roles("USER")
-                .build();
-
             when(itemService.registerItem(any(ItemRegistrationDto.class), any()))
                 .thenReturn(1L);
 
@@ -58,7 +72,7 @@ class ItemControllerTest {
                     .param("startPrice", "10000")
                     .param("durationHour", "24")
                     .param("category", "ELECTRONICS")
-                    .with(user("test@example.com").roles("USER")))
+                    .with(authentication(createAuthentication())))
                 .andExpect(status().isOk())
                 .andExpect(content().string("물품 등록 성공! ID: 1"));
         }
@@ -75,7 +89,7 @@ class ItemControllerTest {
                     .param("startPrice", "5000")
                     .param("durationHour", "12")
                     .param("category", "ELECTRONICS")
-                    .with(user("test@example.com").roles("USER")))
+                    .with(authentication(createAuthentication())))
                 .andExpect(status().isOk())
                 .andExpect(content().string("물품 등록 성공! ID: 2"));
         }
@@ -97,7 +111,7 @@ class ItemControllerTest {
                     .param("startPrice", "10000")
                     .param("durationHour", "24")
                     .param("category", "ELECTRONICS")
-                    .with(user("test@example.com").roles("USER")))
+                    .with(authentication(createAuthentication())))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("등록 실패: 이미지 업로드 실패"));
         }
@@ -127,7 +141,7 @@ class ItemControllerTest {
                     .param("startPrice", "30000")
                     .param("durationHour", "48")
                     .param("category", "ELECTRONICS")
-                    .with(user("test@example.com").roles("USER")))
+                    .with(authentication(createAuthentication())))
                 .andExpect(status().isOk())
                 .andExpect(content().string("물품 등록 성공! ID: 3"));
         }
@@ -144,7 +158,7 @@ class ItemControllerTest {
                     .param("startPrice", "1000")
                     .param("durationHour", "1")
                     .param("category", "ELECTRONICS")
-                    .with(user("test@example.com").roles("USER")))
+                    .with(authentication(createAuthentication())))
                 .andExpect(status().isOk());
 
             mockMvc.perform(multipart("/api/items/register")
@@ -153,7 +167,7 @@ class ItemControllerTest {
                     .param("startPrice", "100000")
                     .param("durationHour", "168")
                     .param("category", "ELECTRONICS")
-                    .with(user("test@example.com").roles("USER")))
+                    .with(authentication(createAuthentication())))
                 .andExpect(status().isOk());
         }
     }

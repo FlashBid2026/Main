@@ -1,6 +1,7 @@
 package com.FlashBid_Main.FlashBid_Main.Item.service;
 
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
+import com.FlashBid_Main.FlashBid_Main.Auth.repository.UserRepository;
 import com.FlashBid_Main.FlashBid_Main.Gcs.service.GcsService;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.Item;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.ItemImage;
@@ -24,10 +25,13 @@ import java.util.List;
 public class ItemService {
 
   private final ItemRepository itemRepository;
+  private final UserRepository userRepository;
   private final GcsService gcsService;
 
   @Transactional
-  public Long registerItem(ItemRegistrationDto dto, User seller) throws IOException {
+  public Long registerItem(ItemRegistrationDto dto, String userId) throws IOException {
+    User seller = userRepository.findByUserId(userId)
+        .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
     LocalDateTime calculatedEndTime = LocalDateTime.now().plusHours(dto.getDurationHour());
 
