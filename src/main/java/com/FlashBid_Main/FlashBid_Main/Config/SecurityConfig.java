@@ -2,6 +2,7 @@ package com.FlashBid_Main.FlashBid_Main.Config;
 
 import com.FlashBid_Main.FlashBid_Main.Auth.filter.JwtFilter;
 import com.FlashBid_Main.FlashBid_Main.Auth.handler.LoginSuccessHandler;
+import com.FlashBid_Main.FlashBid_Main.Auth.handler.LogoutSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final LoginSuccessHandler loginSuccessHandler;
+  private final LogoutSuccessHandler logoutSuccessHandler;
   private final JwtFilter jwtFilter;
 
   @Bean
@@ -50,7 +52,7 @@ public class SecurityConfig {
 
         .logout(logout -> logout
             .logoutUrl("/logout")
-            .logoutSuccessUrl("/login?logout")
+            .logoutSuccessHandler(logoutSuccessHandler)
             .permitAll());
 
     return http.build();

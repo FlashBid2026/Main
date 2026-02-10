@@ -163,11 +163,11 @@ class LoginIntegrationTest {
     @DisplayName("로그아웃 테스트")
     class LogoutTest {
         @Test
-        @DisplayName("로그아웃 시 /login?logout으로 리다이렉트된다")
-        void logout_RedirectsToLoginWithLogoutParam() throws Exception {
+        @DisplayName("로그아웃 시 /home으로 리다이렉트된다")
+        void logout_RedirectsToHome() throws Exception {
             mockMvc.perform(post("/logout"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?logout"));
+                .andExpect(redirectedUrl("/home"));
         }
     }
 }
