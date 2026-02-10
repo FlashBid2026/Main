@@ -167,7 +167,7 @@
 
     // --- Ranking Token + SSE ---
     function acquireTokenAndConnect() {
-        fetch('/api/ranking/token?roomId=' + itemId, {
+        fetch('/api/auction/ranking-token?roomId=' + itemId, {
             method: 'POST',
             credentials: 'same-origin'
         }).then(function(res) {

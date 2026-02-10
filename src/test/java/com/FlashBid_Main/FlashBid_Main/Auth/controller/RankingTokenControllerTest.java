@@ -47,7 +47,7 @@ class RankingTokenControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /api/ranking/token - 인증된 사용자")
+    @DisplayName("POST /api/auction/ranking-token - 인증된 사용자")
     class IssueRankingTokenAuthenticatedTest {
 
         @Test
@@ -60,7 +60,7 @@ class RankingTokenControllerTest {
                     eq("test@example.com"), eq("testuser"), eq(roomId)))
                     .thenReturn(rankingToken);
 
-            mockMvc.perform(post("/api/ranking/token")
+            mockMvc.perform(post("/api/auction/ranking-token")
                             .param("roomId", roomId)
                             .with(authentication(createAuthentication())))
                     .andExpect(status().isOk())
@@ -73,20 +73,20 @@ class RankingTokenControllerTest {
         @Test
         @DisplayName("roomId 파라미터 누락 시 400 Bad Request")
         void issueRankingToken_MissingRoomId_Returns400() throws Exception {
-            mockMvc.perform(post("/api/ranking/token")
+            mockMvc.perform(post("/api/auction/ranking-token")
                             .with(authentication(createAuthentication())))
                     .andExpect(status().isBadRequest());
         }
     }
 
     @Nested
-    @DisplayName("POST /api/ranking/token - 미인증 사용자")
+    @DisplayName("POST /api/auction/ranking-token - 미인증 사용자")
     class IssueRankingTokenUnauthenticatedTest {
 
         @Test
         @DisplayName("인증되지 않은 요청 시 401 Unauthorized")
         void issueRankingToken_Unauthenticated_Returns401() throws Exception {
-            mockMvc.perform(post("/api/ranking/token")
+            mockMvc.perform(post("/api/auction/ranking-token")
                             .param("roomId", "auction-room-123"))
                     .andExpect(status().isUnauthorized());
         }

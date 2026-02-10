@@ -11,7 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/ranking")
+@RequestMapping("/api/auction")
 @RequiredArgsConstructor
 public class RankingTokenController {
 
@@ -20,7 +20,7 @@ public class RankingTokenController {
     @Value("${jwt.access-expiration}")
     private int accessTokenTtl;
 
-    @PostMapping("/token")
+    @PostMapping("/ranking-token")
     public ResponseEntity<Void> issueRankingToken(
             @RequestParam String roomId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
