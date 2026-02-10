@@ -79,6 +79,8 @@ services:
       depends_on:
         - redis
         - rabbitmq
+      ports:
+        - "8081:8081"
       environment:
         SPRING_DATA_REDIS_HOST: redis
         SPRING_DATA_REDIS_PORT: 6379
