@@ -82,6 +82,8 @@ services:
       ports:
         - "8081:8081"
       environment:
+        JWT_SECRET: ${JWT_SECRET_KEY}
+
         SPRING_DATA_REDIS_HOST: redis
         SPRING_DATA_REDIS_PORT: 6379
 
