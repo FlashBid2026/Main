@@ -191,14 +191,14 @@
         }
         sseSource = new EventSource('/api/ranking/stream?roomId=' + itemId);
 
-        sseSource.onmessage = function(event) {
+        sseSource.addEventListener("ranking", function(event) {
             try {
                 var rankings = JSON.parse(event.data);
                 renderLeaderboard(rankings);
             } catch (e) {
                 console.error('SSE parse error:', e);
             }
-        };
+        });
 
         sseSource.onerror = function() {
             console.error('SSE connection error');
