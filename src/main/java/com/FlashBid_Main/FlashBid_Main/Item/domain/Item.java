@@ -3,6 +3,7 @@ package com.FlashBid_Main.FlashBid_Main.Item.domain;
 import com.FlashBid_Main.FlashBid_Main.Auth.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -38,6 +39,11 @@ public class Item {
   @Column(nullable = false)
   private LocalDateTime endTime;
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  @ColumnDefault("'ONGOING'")
+  private AuctionStatus status = AuctionStatus.ONGOING;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "current_winner_id")
   private User currentWinner;
@@ -71,5 +77,9 @@ public class Item {
   public void updateBid(User newWinner, Long newPrice) {
     this.currentWinner = newWinner;
     this.currentPrice = newPrice;
+  }
+
+  public void endAuction() {
+    this.status = AuctionStatus.ENDED;
   }
 }
