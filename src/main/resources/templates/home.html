@@ -114,4 +114,214 @@
                     el.textContent = '종료됨';
                     el.classList.add('text-gray-500');
                 } else {
-                    const days = Math
+                    const days = Math.floor(diff / 86400000);
+                    if (days >= 1) {
+                        el.textContent = days + '일 남음';
+                    } else {
+                        const hours = Math.floor(diff / 3600000);
+                        const minutes = Math.floor((diff % 3600000) / 60000);
+                        const seconds = Math.floor((diff % 60000) / 1000);
+                        el.textContent = String(hours).padStart(2, '0') + ':' +
+                                         String(minutes).padStart(2, '0') + ':' +
+                                         String(seconds).padStart(2, '0');
+                    }
+                }
+            });
+        }
+
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
+    })();
+</script>
+
+<div id="register-modal" class="fixed inset-0 bg-black/80 z-50 hidden items-start justify-center p-4 overflow-y-auto">
+    <div class="relative max-w-xl w-full my-8 bg-[#1E1E1E] p-10 rounded-3xl shadow-2xl border border-gray-800">
+        <button id="close-modal" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <h1 class="text-3xl font-black mb-8 text-[#007AFF]">새 경매 만들기</h1>
+
+        <form id="auction-form" enctype="multipart/form-data" class="space-y-6">
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">상품 이미지 등록 (누적 추가 가능)</label>
+                <div id="drop-zone" class="w-full bg-[#2A2A2A] border-2 border-dashed border-gray-700 rounded-xl p-6 transition-all cursor-pointer hover:border-[#007AFF] text-center">
+                    <input type="file" id="file-input" class="hidden" accept="image/*" multiple>
+                    <div id="upload-placeholder">
+                        <svg class="mx-auto h-10 w-10 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <p class="text-sm text-gray-400">클릭하거나 이미지를 드래그하여 추가하세요</p>
+                    </div>
+                    <ul id="file-list" class="mt-4 text-left space-y-2 hidden"></ul>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">카테고리</label>
+                <div class="relative">
+                    <select id="category-select" name="category" required
+                            class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 text-sm focus:outline-none focus:border-[#007AFF] appearance-none cursor-pointer">
+                        <option value="" disabled selected>카테고리를 선택하세요</option>
+                        <option value="ELECTRONICS">가전</option>
+                        <option value="FASHION">의류</option>
+                        <option value="SHOES">신발</option>
+                        <option value="BAGS">가방</option>
+                        <option value="ACCESSORIES">악세사리</option>
+                        <option value="BEAUTY">뷰티</option>
+                        <option value="SPORTS">스포츠</option>
+                        <option value="BOOKS_MUSIC">도서/음반</option>
+                        <option value="FURNITURE">가구/인테리어</option>
+                        <option value="DIGITAL">디지털</option>
+                        <option value="HOBBY">게임/취미</option>
+                        <option value="OTHERS">기타</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">상품명</label>
+                <input type="text" name="itemName" required placeholder="무엇을 판매하시겠습니까?" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]">
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">시작가 (₩)</label>
+                <div class="flex items-center bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 mb-3">
+                    <input type="text" id="priceDisplay" readonly value="0" class="flex-1 bg-transparent font-mono text-xl text-right focus:outline-none">
+                    <span class="text-gray-400 ml-2">원</span>
+                </div>
+                <input type="hidden" name="startPrice" id="startPriceHidden" value="0">
+                <div class="flex flex-wrap gap-2 mb-2">
+                    <button type="button" data-price="1000" class="price-btn px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] transition-colors">+1천</button>
+                    <button type="button" data-price="5000" class="price-btn px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] transition-colors">+5천</button>
+                    <button type="button" data-price="10000" class="price-btn px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] transition-colors">+1만</button>
+                    <button type="button" data-price="50000" class="price-btn px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] transition-colors">+5만</button>
+                    <button type="button" data-price="100000" class="price-btn px-3 py-2 bg-[#2A2A2A] border border-gray-700 rounded-lg text-sm font-medium hover:border-[#007AFF] transition-colors">+10만</button>
+                </div>
+                <button type="button" id="reset-price-btn" class="px-3 py-2 bg-gray-700 rounded-lg text-sm font-medium hover:bg-gray-600 transition-colors">초기화</button>
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">경매 기간 (시간)</label>
+                <select name="durationHour" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 font-mono text-sm focus:outline-none focus:border-[#007AFF]">
+                    <option value="1">1시간 후 종료</option>
+                    <option value="2">2시간 후 종료</option>
+                    <option value="24">24시간 후 종료</option>
+                    <option value="48">48시간 후 종료</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-2">상세 설명</label>
+                <textarea name="description" rows="4" class="w-full bg-[#2A2A2A] border border-gray-700 rounded-xl p-3 focus:outline-none focus:border-[#007AFF]"></textarea>
+            </div>
+
+            <div class="flex space-x-3 pt-4">
+                <button type="button" id="cancel-modal-btn" class="flex-1 bg-gray-700 py-4 rounded-xl font-bold transition-colors">취소</button>
+                <button type="submit" class="flex-[2] bg-[#007AFF] py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-900/20 transition-all">경매 오픈하기</button>
+            </div>
+        </form>
+        <div id="register-feedback" class="mt-4 hidden"><p id="feedback-message" class="text-center py-3 rounded-xl"></p></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const modal = document.getElementById('register-modal');
+        const openBtn = document.getElementById('open-register-modal');
+        const closeBtn = document.getElementById('close-modal');
+        const cancelBtn = document.getElementById('cancel-modal-btn');
+        const form = document.getElementById('auction-form');
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const placeholder = document.getElementById('upload-placeholder');
+        const feedbackDiv = document.getElementById('register-feedback');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        let allFiles = new DataTransfer();
+        let currentPrice = 0;
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+            resetForm();
+        }
+
+        function resetForm() {
+            form.reset();
+            currentPrice = 0;
+            updatePriceDisplay();
+            allFiles = new DataTransfer();
+            fileInput.files = allFiles.files;
+            fileList.innerHTML = '';
+            fileList.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            feedbackDiv.classList.add('hidden');
+        }
+
+        if (openBtn) openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        function updatePriceDisplay() {
+            document.getElementById('priceDisplay').value = currentPrice.toLocaleString('ko-KR');
+            document.getElementById('startPriceHidden').value = currentPrice;
+        }
+
+        document.querySelectorAll('.price-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentPrice += parseInt(btn.dataset.price);
+                updatePriceDisplay();
+            });
+        });
+
+        document.getElementById('reset-price-btn').addEventListener('click', () => {
+            currentPrice = 0;
+            updatePriceDisplay();
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                placeholder.classList.add('hidden');
+                fileList.classList.remove('hidden');
+                Array.from(e.target.files).forEach(file => {
+                    allFiles.items.add(file);
+                    const li = document.createElement('li');
+                    li.className = 'bg-[#1A1A1A] p-2 rounded-lg text-xs text-gray-300 truncate';
+                    li.textContent = file.name;
+                    fileList.appendChild(li);
+                });
+                fileInput.files = allFiles.files;
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            feedbackDiv.classList.remove('hidden');
+            feedbackMessage.textContent = '등록 중...';
+            feedbackMessage.className = 'text-center py-3 rounded-xl bg-blue-900/50 text-blue-400';
+
+            setTimeout(() => {
+                feedbackMessage.textContent = '성공적으로 등록되었습니다!';
+                feedbackMessage.className = 'text-center py-3 rounded-xl bg-green-900/50 text-green-400';
+                setTimeout(closeModal, 1500);
+            }, 1000);
+        });
+    })();
+</script>
+</body>
+</html>
