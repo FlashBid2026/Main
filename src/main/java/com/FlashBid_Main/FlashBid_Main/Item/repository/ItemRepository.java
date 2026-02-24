@@ -1,5 +1,6 @@
 package com.FlashBid_Main.FlashBid_Main.Item.repository;
 
+import com.FlashBid_Main.FlashBid_Main.Item.domain.AuctionStatus;
 import com.FlashBid_Main.FlashBid_Main.Item.domain.Item;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -9,9 +10,12 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
+
+  List<Item> findAllByStatusAndEndTimeBefore(AuctionStatus status, LocalDateTime time);
 
   Page<Item> findByEndTimeAfterOrderByEndTimeAsc(LocalDateTime now, Pageable pageable);
 
